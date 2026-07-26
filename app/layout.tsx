@@ -1,3 +1,4 @@
+import { CartProvider } from "@/components/commerce/CartProvider";
 import type { Metadata } from "next";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -35,11 +36,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>
+      <body><CartProvider>
         <SiteHeader />
         <main id="main-content">{children}</main>
         <SiteFooter />
-      </body>
+      </CartProvider></body>
     </html>
   );
 }
