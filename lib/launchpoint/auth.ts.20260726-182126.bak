@@ -137,72 +137,16 @@ export async function requireWorkspaceMembership(
     );
   }
 
-  const wait = (milliseconds: number) =>
-    new Promise((resolve) => setTimeout(resolve, milliseconds));
-
-  const runWithRetry = async <T>(
-    label: string,
-    operation: () => PromiseLike<T>,
-  ): Promise<T> => {
-    let lastError: unknown;
-
-    for (let attempt = 1; attempt <= 3; attempt += 1) {
-      try {
-        return await operation();
-      } catch (error) {
-        lastError = error;
-        console.error(`[House of Denise] ${label} attempt ${attempt} failed`, {
-          message: error instanceof Error ? error.message : String(error),
-          cause:
-            error instanceof Error && "cause" in error
-              ? String(error.cause)
-              : undefined,
-          stack: error instanceof Error ? error.stack : undefined,
-          node: process.version,
-          supabaseUrl:
-            process.env.NEXT_PUBLIC_SUPABASE_URL ??
-            process.env.SUPABASE_URL ??
-            "missing",
-        });
-
-        if (attempt < 3) await wait(attempt * 300);
-      }
-    }
-
-    throw lastError;
-  };
-
   const loadContext = async () => {
-    const profileResult = await runWithRetry("profile lookup", () =>
-      admin.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-    );
-
-    if (profileResult.error) {
-      throw new Error(
-        `Profile lookup failed: ${profileResult.error.message}` +
-          (profileResult.error.details ? ` â€” ${profileResult.error.details}` : ""),
-      );
-    }
-
-    const workspaceResult = await runWithRetry("workspace lookup", () =>
-      admin
-        .from("workspaces")
-        .select("*")
-        .eq("id", workspaceId)
-        .eq("status", "active")
-        .maybeSingle(),
-    );
-
-    if (workspaceResult.error) {
-      throw new Error(
-        `Workspace lookup failed: ${workspaceResult.error.message}` +
-          (workspaceResult.error.details ? ` â€” ${workspaceResult.error.details}` : ""),
-      );
-    }
-
-    const membershipResult = await runWithRetry(
-      "workspace membership lookup",
-      () =>
+    const [profileResult, workspaceResult, membershipResult] =
+      await Promise.all([
+        admin.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+        admin
+          .from("workspaces")
+          .select("*")
+          .eq("id", workspaceId)
+          .eq("status", "active")
+          .maybeSingle(),
         admin
           .from("workspace_memberships")
           .select("*")
@@ -210,12 +154,21 @@ export async function requireWorkspaceMembership(
           .eq("user_id", user.id)
           .eq("status", "active")
           .maybeSingle(),
-    );
+      ]);
+
+    if (profileResult.error) {
+      throw new Error(`Profile lookup failed: ${profileResult.error.message}`);
+    }
+
+    if (workspaceResult.error) {
+      throw new Error(
+        `Workspace lookup failed: ${workspaceResult.error.message}`,
+      );
+    }
 
     if (membershipResult.error) {
       throw new Error(
-        `Workspace membership lookup failed: ${membershipResult.error.message}` +
-          (membershipResult.error.details ? ` â€” ${membershipResult.error.details}` : ""),
+        `Workspace membership lookup failed: ${membershipResult.error.message}`,
       );
     }
 
@@ -225,6 +178,7 @@ export async function requireWorkspaceMembership(
       membership: membershipResult.data,
     };
   };
+
   let context = await loadContext();
 
   /*
@@ -298,4 +252,3 @@ export async function requireOwner() {
     "/admin",
   );
 }
-

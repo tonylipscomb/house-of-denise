@@ -5,11 +5,11 @@ import { redirect } from "next/navigation";
 
 async function createAuthenticatedServerClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const anonKey =
+  const publicKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ||
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim();
 
-  if (!url || !anonKey) {
+  if (!url || !publicKey) {
     throw new Error(
       "Admin authentication requires NEXT_PUBLIC_SUPABASE_URL and a public Supabase key.",
     );
@@ -17,7 +17,7 @@ async function createAuthenticatedServerClient() {
 
   const cookieStore = await cookies();
 
-  return createServerClient(url, anonKey, {
+  return createServerClient(url, publicKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -28,15 +28,15 @@ async function createAuthenticatedServerClient() {
             cookieStore.set(name, value, options);
           }
         } catch {
-          /*
-           * Cookie writes can be unavailable while rendering a Server
-           * Component. Authentication reads still work, and middleware or
-           * server actions can refresh sessions when needed.
-           */
+          // Cookie writes may be unavailable during Server Component rendering.
         }
       },
     },
   });
+}
+
+function normalizedRole(value: unknown): string {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
 }
 
 export async function requireCommerceAdmin() {
@@ -51,22 +51,31 @@ export async function requireCommerceAdmin() {
     redirect("/login");
   }
 
-  const { data: profile, error: profileError } = await supabase
+  /*
+   * Primary role source: app_metadata.
+   * This is written only by trusted server/admin code and cannot be changed
+   * by ordinary browser users.
+   */
+  const metadataRole = normalizedRole(user.app_metadata?.role);
+
+  if (["owner", "admin"].includes(metadataRole)) {
+    return user;
+  }
+
+  /*
+   * Compatibility fallback for projects that later add a public.profiles
+   * table. A missing table is not fatal because app_metadata remains the
+   * trusted role source for this project.
+   */
+  const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
 
-  const role =
-    profile && typeof profile.role === "string"
-      ? profile.role.toLowerCase()
-      : "";
+  const profileRole = normalizedRole(profile?.role);
 
-  if (
-    profileError ||
-    !profile ||
-    !["owner", "admin"].includes(role)
-  ) {
+  if (!["owner", "admin"].includes(profileRole)) {
     redirect("/account");
   }
 
