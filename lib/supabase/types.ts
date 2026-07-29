@@ -133,11 +133,18 @@ export type Booking = {
   amount_paid_cents: number;
   remaining_balance_cents: number;
   remaining_balance_due_at: string | null;
-  payment_option: "deposit" | "full";
+  payment_option: "deposit" | "full";
+  payment_provider: string | null;
   square_checkout_id: string | null;
+  stripe_checkout_session_id: string | null;
+  stripe_payment_intent_id: string | null;
+  stripe_checkout_url: string | null;
+  square_order_id: string | null;
   square_payment_id: string | null;
+  square_receipt_url: string | null;
   square_payment_link_url: string | null;
   checkout_idempotency_key: string | null;
+  paid_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -191,13 +198,141 @@ export type BookingInquiryRow = {
   special_requests: string | null;
   referral_source: string | null;
   consent_accepted: boolean;
-  inquiry_status: "new" | "reviewing" | "followed-up" | "closed";
+  inquiry_status:
+    | "new"
+    | "reviewing"
+    | "followed-up"
+    | "closed"
+    | "contacted"
+    | "consultation_scheduled"
+    | "proposal_sent"
+    | "converted";
   deposit_status: "not_requested" | "pending" | "paid" | "waived";
   square_checkout_reference: string | null;
   square_payment_reference: string | null;
   owner_email_status: "pending" | "sent" | "failed";
   customer_email_status: "pending" | "sent" | "failed";
   submission_fingerprint: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AdminNote = {
+  id: string;
+  workspace_id: string;
+  booking_id: string | null;
+  booking_inquiry_id: string | null;
+  author_id: string | null;
+  body: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CommerceOrder = {
+  id: string;
+  reference: string;
+  customer_id: string | null;
+  customer_email: string | null;
+  customer_phone: string | null;
+  status: string;
+  payment_status: string;
+  payment_provider: string | null;
+  fulfillment_status: string;
+  currency: string;
+  subtotal_cents: number;
+  total_cents: number;
+  square_order_id: string | null;
+  square_payment_link_id: string | null;
+  square_payment_link_url: string | null;
+  stripe_checkout_session_id: string | null;
+  stripe_payment_intent_id: string | null;
+  stripe_checkout_url: string | null;
+  fulfillment_type: string | null;
+  fulfillment_details: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  paid_at: string | null;
+};
+
+export type CalendarBlock = {
+  id: string;
+  workspace_id: string;
+  title: string;
+  block_date: string | null;
+  start_at: string | null;
+  end_at: string | null;
+  all_day: boolean;
+  notes: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CustomerNote = {
+  id: string;
+  workspace_id: string;
+  customer_email: string;
+  author_id: string | null;
+  body: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CatalogPackageRow = {
+  id: string;
+  workspace_id: string;
+  name: string;
+  description: string;
+  price_cents: number | null;
+  guest_allowance: number;
+  fragrance_options: number;
+  features: string[] | unknown;
+  most_popular: boolean;
+  requires_manual_approval: boolean;
+  active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CatalogUpgradeRow = {
+  id: string;
+  workspace_id: string;
+  name: string;
+  description: string;
+  pricing_type: "flat" | "per_guest" | "per_hour" | "quote";
+  price_cents: number | null;
+  allow_quantity: boolean;
+  max_quantity: number;
+  active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CatalogExperienceRow = {
+  id: string;
+  workspace_id: string;
+  slug: string;
+  title: string;
+  description: string;
+  image_src: string | null;
+  image_alt: string | null;
+  starting_price_cents: number;
+  duration_label: string | null;
+  guest_range_label: string | null;
+  min_guests: number;
+  max_guests: number;
+  duration_minutes: number;
+  deposit_percent: number;
+  service_fee_cents: number;
+  most_popular: boolean;
+  package_ids: string[] | unknown;
+  upgrade_ids: string[] | unknown;
+  active: boolean;
+  featured: boolean;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 };
@@ -230,6 +365,48 @@ export type Database = {
         Update: Partial<BookingInquiryRow>;
         Relationships: [];
       };
+      admin_notes: {
+        Row: AdminNote;
+        Insert: Partial<AdminNote> & Pick<AdminNote, "workspace_id" | "body">;
+        Update: Partial<AdminNote>;
+        Relationships: [];
+      };
+      commerce_orders: {
+        Row: CommerceOrder;
+        Insert: Partial<CommerceOrder> & Pick<CommerceOrder, "reference" | "subtotal_cents" | "total_cents">;
+        Update: Partial<CommerceOrder>;
+        Relationships: [];
+      };
+      calendar_blocks: {
+        Row: CalendarBlock;
+        Insert: Partial<CalendarBlock> & Pick<CalendarBlock, "workspace_id" | "title">;
+        Update: Partial<CalendarBlock>;
+        Relationships: [];
+      };
+      customer_notes: {
+        Row: CustomerNote;
+        Insert: Partial<CustomerNote> & Pick<CustomerNote, "workspace_id" | "customer_email" | "body">;
+        Update: Partial<CustomerNote>;
+        Relationships: [];
+      };
+      catalog_packages: {
+        Row: CatalogPackageRow;
+        Insert: Partial<CatalogPackageRow> & Pick<CatalogPackageRow, "id" | "workspace_id" | "name">;
+        Update: Partial<CatalogPackageRow>;
+        Relationships: [];
+      };
+      catalog_upgrades: {
+        Row: CatalogUpgradeRow;
+        Insert: Partial<CatalogUpgradeRow> & Pick<CatalogUpgradeRow, "id" | "workspace_id" | "name">;
+        Update: Partial<CatalogUpgradeRow>;
+        Relationships: [];
+      };
+      catalog_experiences: {
+        Row: CatalogExperienceRow;
+        Insert: Partial<CatalogExperienceRow> & Pick<CatalogExperienceRow, "id" | "workspace_id" | "slug" | "title">;
+        Update: Partial<CatalogExperienceRow>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -237,3 +414,9 @@ export type Database = {
     CompositeTypes: Record<string, never>;
   };
 };
+
+
+
+
+
+

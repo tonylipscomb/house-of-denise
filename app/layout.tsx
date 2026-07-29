@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Playfair_Display } from "next/font/google";
 import { CartProvider } from "@/components/commerce/CartProvider";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SiteChrome } from "@/components/layout/SiteChrome";
 import { siteMetadata } from "@/lib/metadata";
 import "./globals.css";
 
@@ -55,9 +54,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`${playfair.variable} ${dmSans.variable}`}>
       <body>
         <CartProvider>
-          <SiteHeader />
-          <main id="main-content">{children}</main>
-          <SiteFooter />
+          <SiteChrome>{children}</SiteChrome>
         </CartProvider>
       </body>
     </html>

@@ -1,6 +1,6 @@
 import type { Service, ServiceVariant } from "@/lib/supabase/types";
 import { Button } from "@/components/ui/Button";
-import { saveServiceAction, saveVariantAction } from "@/app/admin/services/actions";
+import { saveServiceAction, saveVariantAction } from "@/app/admin/(dashboard)/services/actions";
 
 export function ServiceForm({ service }: { service?: Service | null }) {
   return (

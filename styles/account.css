@@ -1,0 +1,201 @@
+/* Customer account portal */
+
+.account-staff-banner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.9rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid color-mix(in srgb, var(--color-gold) 40%, transparent);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--color-champagne) 45%, var(--color-ivory));
+}
+
+.account-staff-banner svg {
+  color: var(--color-gold);
+}
+
+.account-staff-banner strong {
+  display: block;
+  color: var(--color-espresso);
+  font-size: var(--text-sm);
+}
+
+.account-staff-banner p {
+  margin: 0.2rem 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.account-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.account-kpi {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-ivory);
+  box-shadow: var(--shadow-sm);
+}
+
+.account-kpi span {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.account-kpi strong {
+  color: var(--color-espresso);
+  font-family: var(--font-serif);
+  font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
+  font-weight: 500;
+}
+
+.account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 1.5rem;
+}
+
+.portal-card__head {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: start;
+}
+
+.portal-card__head h2 {
+  margin: 0;
+  font-size: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
+}
+
+.portal-card__head p {
+  margin: 0.35rem 0 0;
+}
+
+.account-booking-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.account-booking-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr);
+  gap: 1rem;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.account-booking-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.account-booking-list__title {
+  color: var(--color-espresso);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.account-booking-list__title:hover {
+  color: var(--color-gold);
+}
+
+.account-booking-list p {
+  margin: 0.25rem 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.account-booking-list__meta {
+  display: grid;
+  justify-items: end;
+  align-content: start;
+  gap: 0.3rem;
+  text-align: right;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.account-booking-list__meta a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-gold);
+  font-weight: 600;
+}
+
+.account-status {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-champagne) 55%, var(--color-ivory));
+  color: var(--color-espresso);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
+}
+
+.account-empty {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+}
+
+.account-muted {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 400;
+}
+
+@media (max-width: 900px) {
+  .account-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .account-staff-banner {
+    grid-template-columns: auto 1fr;
+  }
+
+  .account-staff-banner .btn {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .account-booking-list li {
+    grid-template-columns: 1fr;
+  }
+
+  .account-booking-list__meta {
+    justify-items: start;
+    text-align: left;
+  }
+}
+
+@media (max-width: 640px) {
+  .account-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .account-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

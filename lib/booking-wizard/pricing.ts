@@ -1,11 +1,14 @@
 import {
   BOOKING_TIMEZONE,
   REMAINING_BALANCE_DAYS_BEFORE_EVENT,
-  getExperience,
-  getPackage,
-  getUpgrade,
+  getExperience as staticGetExperience,
+  getPackage as staticGetPackage,
+  getUpgrade as staticGetUpgrade,
+  type BookingExperience,
   type BookingExperienceId,
+  type BookingPackage,
   type BookingPackageId,
+  type BookingUpgrade,
   type BookingUpgradeId
 } from "@/data/booking-catalog";
 
@@ -38,6 +41,12 @@ export type PricingBreakdown = {
   timezone: string;
 };
 
+export type PricingCatalogAccessors = {
+  getExperience: (id: string | null | undefined) => BookingExperience | undefined;
+  getPackage: (id: string | null | undefined) => BookingPackage | undefined;
+  getUpgrade: (id: string | null | undefined) => BookingUpgrade | undefined;
+};
+
 export class PricingError extends Error {
   constructor(message: string) {
     super(message);
@@ -45,13 +54,22 @@ export class PricingError extends Error {
   }
 }
 
-export function calculateBookingPricing(input: PricingInput): PricingBreakdown {
-  const experience = getExperience(input.experienceId);
+const defaultAccessors: PricingCatalogAccessors = {
+  getExperience: staticGetExperience,
+  getPackage: staticGetPackage,
+  getUpgrade: staticGetUpgrade
+};
+
+export function calculateBookingPricing(
+  input: PricingInput,
+  accessors: PricingCatalogAccessors = defaultAccessors
+): PricingBreakdown {
+  const experience = accessors.getExperience(input.experienceId);
   if (!experience) {
     throw new PricingError("Select a valid experience before calculating pricing.");
   }
 
-  const pkg = getPackage(input.packageId);
+  const pkg = accessors.getPackage(input.packageId);
   if (!pkg) {
     throw new PricingError("Select a valid package before calculating pricing.");
   }
@@ -86,7 +104,7 @@ export function calculateBookingPricing(input: PricingInput): PricingBreakdown {
       throw new PricingError(`Upgrade not available: ${selected.id}`);
     }
 
-    const upgrade = getUpgrade(selected.id);
+    const upgrade = accessors.getUpgrade(selected.id);
     if (!upgrade) {
       throw new PricingError(`Unknown upgrade: ${selected.id}`);
     }
@@ -140,7 +158,7 @@ export function calculateBookingPricing(input: PricingInput): PricingBreakdown {
 }
 
 export function assertExperienceId(id: string): asserts id is BookingExperienceId {
-  if (!getExperience(id)) {
+  if (!staticGetExperience(id)) {
     throw new PricingError("Invalid experience selection.");
   }
 }

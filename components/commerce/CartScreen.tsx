@@ -31,7 +31,7 @@ export function CartScreen() {
     setSubmitting(true);
 
     try {
-      const response = await fetch("/api/checkout/square", {
+      const response = await fetch("/api/checkout/stripe", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -76,7 +76,7 @@ export function CartScreen() {
   }
 
   if (!hydrated) {
-    return <p>Loading your cartâ€¦</p>;
+    return <p>Loading your cart{"\u2026"}</p>;
   }
 
   if (items.length === 0) {
@@ -305,10 +305,11 @@ export function CartScreen() {
           }}
         >
           {submitting
-            ? "Opening secure checkoutâ€¦"
+            ? `Opening secure checkout${"\u2026"}`
             : "Continue to Square"}
         </button>
       </aside>
     </div>
   );
 }
+

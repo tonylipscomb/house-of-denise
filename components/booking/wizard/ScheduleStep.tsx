@@ -12,15 +12,39 @@ import { useBookingWizard } from "./BookingWizardProvider";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/cn";
 
+/** How far ahead guests can browse from the current month. */
+const BOOKABLE_MONTHS_AHEAD = 6;
+
+function monthCursorFromDate(date: Date) {
+  return { year: date.getFullYear(), monthIndex: date.getMonth() };
+}
+
+function shiftMonth(
+  cursor: { year: number; monthIndex: number },
+  delta: number
+) {
+  const date = new Date(cursor.year, cursor.monthIndex + delta, 1);
+  return monthCursorFromDate(date);
+}
+
+function monthKey(cursor: { year: number; monthIndex: number }) {
+  return cursor.year * 12 + cursor.monthIndex;
+}
+
 export function ScheduleStep() {
   const { state, dispatch, nextStep, prevStep } = useBookingWizard();
-  const [cursor, setCursor] = useState(() => {
-    const now = new Date();
-    return { year: now.getFullYear(), monthIndex: now.getMonth() };
-  });
+  const minCursor = useMemo(() => monthCursorFromDate(new Date()), []);
+  const maxCursor = useMemo(
+    () => shiftMonth(minCursor, BOOKABLE_MONTHS_AHEAD),
+    [minCursor]
+  );
+  const [cursor, setCursor] = useState(() => minCursor);
   const [days, setDays] = useState<DayAvailability[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const canGoPrev = monthKey(cursor) > monthKey(minCursor);
+  const canGoNext = monthKey(cursor) < monthKey(maxCursor);
 
   useEffect(() => {
     let cancelled = false;
@@ -77,32 +101,33 @@ export function ScheduleStep() {
           <div className="bw-calendar__nav">
             <button
               type="button"
-              className="lux-header__icon"
+              className="bw-calendar__nav-btn"
               aria-label="Previous month"
-              onClick={() =>
-                setCursor((prev) => {
-                  const date = new Date(prev.year, prev.monthIndex - 1, 1);
-                  return { year: date.getFullYear(), monthIndex: date.getMonth() };
-                })
-              }
+              disabled={!canGoPrev}
+              onClick={() => {
+                if (!canGoPrev) return;
+                setCursor((prev) => shiftMonth(prev, -1));
+              }}
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={18} aria-hidden="true" />
             </button>
-            <p>{monthLabel}</p>
+            <p className="bw-calendar__month">{monthLabel}</p>
             <button
               type="button"
-              className="lux-header__icon"
+              className="bw-calendar__nav-btn"
               aria-label="Next month"
-              onClick={() =>
-                setCursor((prev) => {
-                  const date = new Date(prev.year, prev.monthIndex + 1, 1);
-                  return { year: date.getFullYear(), monthIndex: date.getMonth() };
-                })
-              }
+              disabled={!canGoNext}
+              onClick={() => {
+                if (!canGoNext) return;
+                setCursor((prev) => shiftMonth(prev, 1));
+              }}
             >
-              <ChevronRight size={18} />
+              <ChevronRight size={18} aria-hidden="true" />
             </button>
           </div>
+          <p className="bw-calendar__hint">
+            Browse up to {BOOKABLE_MONTHS_AHEAD} months ahead.
+          </p>
 
           <div className="bw-calendar__weekdays" aria-hidden="true">
             {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
@@ -111,7 +136,7 @@ export function ScheduleStep() {
           </div>
 
           {isPending && days.length === 0 ? (
-            <p className="bw-muted">Loading availability…</p>
+            <p className="bw-muted">Loading availability{"\u2026"}</p>
           ) : error ? (
             <p className="bw-error">{error}</p>
           ) : (

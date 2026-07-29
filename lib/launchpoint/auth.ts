@@ -44,7 +44,12 @@ function normalizeRole(value: unknown): WorkspaceRole {
 }
 
 export function loginRedirectFor(pathname: string) {
-  return `/login?next=${encodeURIComponent(safeNext(pathname))}`;
+  const next = safeNext(pathname);
+  if (next.startsWith("/admin")) {
+    const destination = next === "/admin/login" ? "/admin" : next;
+    return `/admin/login?next=${encodeURIComponent(destination)}`;
+  }
+  return `/login?next=${encodeURIComponent(next)}`;
 }
 
 export async function requireAuthenticatedUser(returnTo = "/account") {
@@ -94,15 +99,52 @@ async function upsertHouseOfDeniseMembership(params: {
     );
   }
 
-  const membershipResult = await admin.from("workspace_memberships").upsert(
-    {
-      workspace_id: HOUSE_OF_DENISE_WORKSPACE_ID,
-      user_id: params.userId,
-      role: params.role ?? "customer",
-      status: "active",
-    },
-    { onConflict: "workspace_id,user_id" },
-  );
+  const existingResult = await admin
+    .from("workspace_memberships")
+    .select("id, role")
+    .eq("workspace_id", HOUSE_OF_DENISE_WORKSPACE_ID)
+    .eq("user_id", params.userId)
+    .maybeSingle();
+
+  if (existingResult.error) {
+    throw new Error(
+      `Unable to look up the signed-in user's workspace membership: ${existingResult.error.message}`,
+    );
+  }
+
+  const requestedRole = params.role ?? "customer";
+  const elevatedRoles = new Set<WorkspaceRole>(["staff", "admin", "owner"]);
+
+  if (existingResult.data) {
+    // Login/register flows call this with role=customer. Never downgrade staff/admin/owner.
+    const nextRole =
+      elevatedRoles.has(existingResult.data.role) && requestedRole === "customer"
+        ? existingResult.data.role
+        : requestedRole;
+
+    const membershipResult = await admin
+      .from("workspace_memberships")
+      .update({
+        role: nextRole,
+        status: "active",
+      })
+      .eq("id", existingResult.data.id);
+
+    if (membershipResult.error) {
+      throw new Error(
+        `Unable to update the signed-in user's workspace membership: ${membershipResult.error.message}`,
+      );
+    }
+
+    return;
+  }
+
+  const membershipResult = await admin.from("workspace_memberships").insert({
+    workspace_id: HOUSE_OF_DENISE_WORKSPACE_ID,
+    user_id: params.userId,
+    role: requestedRole,
+    status: "active",
+  });
 
   if (membershipResult.error) {
     throw new Error(
@@ -180,7 +222,7 @@ export async function requireWorkspaceMembership(
     if (profileResult.error) {
       throw new Error(
         `Profile lookup failed: ${profileResult.error.message}` +
-          (profileResult.error.details ? ` â€” ${profileResult.error.details}` : ""),
+          (profileResult.error.details ? ` \u2014 ${profileResult.error.details}` : ""),
       );
     }
 
@@ -196,7 +238,7 @@ export async function requireWorkspaceMembership(
     if (workspaceResult.error) {
       throw new Error(
         `Workspace lookup failed: ${workspaceResult.error.message}` +
-          (workspaceResult.error.details ? ` â€” ${workspaceResult.error.details}` : ""),
+          (workspaceResult.error.details ? ` \u2014 ${workspaceResult.error.details}` : ""),
       );
     }
 
@@ -215,7 +257,7 @@ export async function requireWorkspaceMembership(
     if (membershipResult.error) {
       throw new Error(
         `Workspace membership lookup failed: ${membershipResult.error.message}` +
-          (membershipResult.error.details ? ` â€” ${membershipResult.error.details}` : ""),
+          (membershipResult.error.details ? ` \u2014 ${membershipResult.error.details}` : ""),
       );
     }
 
@@ -287,7 +329,7 @@ export async function requireAdmin() {
   return requireWorkspaceRole(
     ["admin", "owner"],
     HOUSE_OF_DENISE_WORKSPACE_ID,
-    "/admin",
+    "/admin/login",
   );
 }
 
@@ -295,7 +337,7 @@ export async function requireOwner() {
   return requireWorkspaceRole(
     ["owner"],
     HOUSE_OF_DENISE_WORKSPACE_ID,
-    "/admin",
+    "/admin/login",
   );
 }
 

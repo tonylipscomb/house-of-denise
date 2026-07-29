@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { createBookingSquareCheckout } from "@/lib/booking-wizard/checkout";
+import { createBookingStripeCheckout } from "@/lib/booking-wizard/checkout";
 import type { BookingWizardState } from "@/lib/booking-wizard/types";
 import { canNavigateToStep } from "@/lib/booking-wizard/types";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { SupabaseConfigError } from "@/lib/supabase/env";
 
 export const runtime = "nodejs";
 
 function isWizardState(value: unknown): value is BookingWizardState {
   return Boolean(value && typeof value === "object" && (value as BookingWizardState).version === 1);
+}
+
+function stripeFailureMessage(message: string) {
+  return (
+    message.includes("Stripe") ||
+    message.includes("stripe") ||
+    message.includes("checkout session")
+  );
 }
 
 export async function POST(request: Request) {
@@ -40,13 +49,20 @@ export async function POST(request: Request) {
         const {
           data: { user }
         } = await supabase.auth.getUser();
-        customerId = user?.id ?? null;
+        const { resolveBookingCustomerId } = await import(
+          "@/lib/booking-wizard/claim-bookings"
+        );
+        customerId = resolveBookingCustomerId({
+          authUserId: user?.id,
+          authEmail: user?.email,
+          guestEmail: state.customer.email
+        });
       }
     } catch {
       customerId = null;
     }
 
-    const result = await createBookingSquareCheckout({
+    const result = await createBookingStripeCheckout({
       state,
       customerId,
       idempotencyKey
@@ -55,21 +71,55 @@ export async function POST(request: Request) {
     return NextResponse.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected checkout error.";
-    console.error("Booking checkout failed", { message });
+    console.error("Booking checkout failed", {
+      message,
+      code: error instanceof SupabaseConfigError ? error.code : undefined
+    });
+
+    if (error instanceof SupabaseConfigError) {
+      const status =
+        error.code === "database_error"
+          ? 500
+          : error.code === "supabase_auth_failure" ||
+              error.code === "project_key_mismatch" ||
+              error.code === "invalid_service_role_key"
+            ? 502
+            : 500;
+
+      return NextResponse.json(
+        {
+          error: error.message,
+          code: error.code
+        },
+        { status }
+      );
+    }
+
+    if (stripeFailureMessage(message)) {
+      return NextResponse.json(
+        {
+          error: "Stripe Checkout could not be started. Please try again in a moment.",
+          code: "stripe_checkout_failure"
+        },
+        { status: 502 }
+      );
+    }
 
     const clientError =
       message.includes("required") ||
       message.includes("available") ||
       message.includes("Custom packages") ||
-      message.includes("Invalid") ||
+      message.includes("Invalid booking") ||
       message.includes("consultation") ||
-      message.includes("reserved");
+      message.includes("reserved") ||
+      message.includes("unavailable");
 
     return NextResponse.json(
       {
         error: clientError
           ? message
-          : "Checkout could not be started. Please try again in a moment."
+          : "Checkout could not be started. Please try again in a moment.",
+        code: clientError ? "booking_validation_error" : "checkout_failure"
       },
       { status: clientError ? 400 : 500 }
     );

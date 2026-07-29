@@ -56,7 +56,7 @@ values
     'deposit',
     12500,
     true,
-    '/images/mobile-fragrance-bar.jpg',
+    '/images/house-of-denise/shop-mobile-fragrance-bar.jpg',
     'booking',
     1,
     '{"pricing_status":"placeholder","remaining_balance":"Determined after consultation"}'::jsonb
@@ -68,7 +68,7 @@ values
     'deposit',
     17500,
     true,
-    '/images/private-event.jpg',
+    '/images/house-of-denise/shop-private-events.jpg',
     'booking',
     1,
     '{"pricing_status":"placeholder","remaining_balance":"Determined after consultation"}'::jsonb
@@ -80,7 +80,7 @@ values
     'workshop',
     6500,
     true,
-    '/images/fragrance-workshop.jpg',
+    '/images/house-of-denise/shop-workshops.jpg',
     'booking',
     10,
     '{"pricing_status":"placeholder","price_basis":"per guest"}'::jsonb
@@ -92,7 +92,7 @@ values
     'experience',
     8500,
     true,
-    '/images/perfume-bar.jpg',
+    '/images/house-of-denise/shop-perfume-bar.jpg',
     'booking',
     10,
     '{"pricing_status":"placeholder","price_basis":"per guest"}'::jsonb
@@ -104,7 +104,7 @@ values
     'product',
     4500,
     true,
-    '/images/fragrance-gift-set.jpg',
+    '/images/house-of-denise/shop-custom-gift-set.jpg',
     'shipping',
     5,
     '{"pricing_status":"placeholder"}'::jsonb

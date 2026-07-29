@@ -1,4 +1,4 @@
-﻿import "server-only";
+import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import type { ResolvedCheckoutLine, CheckoutPayload } from "./checkout";
 
@@ -108,3 +108,30 @@ export async function markCheckoutError(orderId: string) {
     })
     .eq("id", orderId);
 }
+
+export async function attachStripeCheckout(input: {
+  orderId: string;
+  checkoutSessionId: string;
+  checkoutUrl: string;
+  paymentIntentId: string | null;
+}) {
+  const supabase = adminClient();
+
+  const { error } = await supabase
+    .from("commerce_orders")
+    .update({
+      status: "checkout_created",
+      payment_status: "pending",
+      payment_provider: "stripe",
+      stripe_checkout_session_id: input.checkoutSessionId,
+      stripe_checkout_url: input.checkoutUrl,
+      stripe_payment_intent_id: input.paymentIntentId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", input.orderId);
+
+  if (error) {
+    throw new Error(`Unable to attach Stripe checkout: ${error.message}`);
+  }
+}
+

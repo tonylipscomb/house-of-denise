@@ -1,98 +1,236 @@
-import { CalendarDays, ClipboardList, LogOut, UserRound } from "lucide-react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  CalendarDays,
+  ClipboardList,
+  LogOut,
+  Package,
+  Shield,
+  Sparkles,
+  UserRound
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { createPageMetadata } from "@/lib/metadata";
-import { getSupabaseAdminClient } from "@/lib/supabase/admin";
-import { requireWorkspaceMembership } from "@/lib/launchpoint/auth";
 import { logoutAction } from "@/app/auth/actions";
+import { getCustomerPortalData } from "@/lib/account/portal";
+import { requireWorkspaceMembership } from "@/lib/launchpoint/auth";
+import { createPageMetadata } from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
-  title: "Account",
-  description: "Manage your House Of Denise account.",
+  title: "My Account",
+  description: "Manage your House Of Denise bookings, orders, and profile.",
   path: "/account"
 });
 
 export default async function AccountPage() {
   const context = await requireWorkspaceMembership(undefined, "/account");
-  const admin = getSupabaseAdminClient();
-
-  const [{ data: bookings }, { data: inquiries }] = admin
-    ? await Promise.all([
-        admin
-          .from("bookings")
-          .select("id, reference_number, start_at, status, payment_status, service_id")
-          .eq("workspace_id", context.workspace.id)
-          .eq("customer_id", context.userId)
-          .order("created_at", { ascending: false })
-          .limit(5),
-        admin
-          .from("booking_inquiries")
-          .select("reference_number, event_date, inquiry_status, created_at")
-          .eq("workspace_id", context.workspace.id)
-          .eq("customer_id", context.userId)
-          .order("created_at", { ascending: false })
-          .limit(5)
-      ])
-    : [{ data: [] }, { data: [] }];
-
-  const displayName = context.profile?.full_name || context.email || "friend";
-  const profileComplete = Boolean(context.profile?.full_name && context.profile?.phone);
+  const portal = await getCustomerPortalData({
+    userId: context.userId,
+    email: context.email,
+    fullName: context.profile?.full_name,
+    phone: context.profile?.phone,
+    role: context.membership.role
+  });
 
   return (
     <section className="account-page" aria-labelledby="account-title">
-      <div className="account-hero">
+      {portal.isStaff ? (
+        <aside className="account-staff-banner" role="note">
+          <Shield size={18} aria-hidden="true" />
+          <div>
+            <strong>Staff account</strong>
+            <p>
+              You{"\u2019"}re signed in with workspace access. This page is your
+              personal customer portal. Business operations live in the admin
+              dashboard.
+            </p>
+          </div>
+          <Button href="/admin" variant="gold" size="sm">
+            Open admin dashboard
+          </Button>
+        </aside>
+      ) : null}
+
+      <header className="account-hero">
         <div>
-          <p className="eyebrow">Customer portal</p>
-          <h1 id="account-title">Welcome, {displayName}</h1>
-          <p>Your account keeps profile details, inquiry history, and future confirmed bookings tied to your verified login.</p>
+          <p className="eyebrow">My account</p>
+          <h1 id="account-title">Welcome back, {portal.displayName}</h1>
+          <p>
+            Track your fragrance experiences, remaining balances, and profile
+            details in one place.
+            {portal.email ? (
+              <>
+                {" "}
+                Signed in as <strong>{portal.email}</strong>.
+              </>
+            ) : null}
+          </p>
         </div>
         <form action={logoutAction}>
-          <Button type="submit" variant="outline" leftIcon={<LogOut size={18} />}>Log out</Button>
+          <Button
+            type="submit"
+            variant="outline"
+            leftIcon={<LogOut size={18} aria-hidden="true" />}
+          >
+            Log out
+          </Button>
         </form>
+      </header>
+
+      <div className="account-kpis" aria-label="Account overview">
+        <article className="account-kpi">
+          <span>Upcoming experiences</span>
+          <strong>{portal.upcomingCount}</strong>
+        </article>
+        <article className="account-kpi">
+          <span>Balance due</span>
+          <strong>{portal.balanceDueLabel}</strong>
+        </article>
+        <article className="account-kpi">
+          <span>Shop orders</span>
+          <strong>{portal.orders.length}</strong>
+        </article>
+        <article className="account-kpi">
+          <span>Profile</span>
+          <strong>{portal.profileComplete ? "Complete" : "Needs info"}</strong>
+        </article>
+      </div>
+
+      <div className="account-actions">
+        <Button
+          href="/booking"
+          variant="primary"
+          leftIcon={<Sparkles size={17} aria-hidden="true" />}
+        >
+          Book an experience
+        </Button>
+        <Button href="/account/bookings" variant="outline">
+          View all bookings
+        </Button>
+        <Button href="/account/profile" variant="outline">
+          Manage profile
+        </Button>
+        <Button href="/contact" variant="text">
+          Contact House of Denise
+        </Button>
       </div>
 
       <div className="account-grid">
-        <article className="portal-card">
-          <UserRound size={22} aria-hidden="true" />
-          <h2>Profile</h2>
-          <p>{profileComplete ? "Your profile is ready for future booking features." : "Add your phone and name before direct booking opens."}</p>
-          <Button href="/account/profile" variant="secondary">Manage profile</Button>
-        </article>
+        <article className="portal-card portal-card--bookings">
+          <div className="portal-card__head">
+            <CalendarDays size={22} aria-hidden="true" />
+            <div>
+              <h2>Your experiences</h2>
+              <p>Upcoming and recent bookings linked to this account.</p>
+            </div>
+          </div>
 
-        <article className="portal-card">
-          <CalendarDays size={22} aria-hidden="true" />
-          <h2>Upcoming bookings</h2>
-          {bookings?.length ? (
-            <ul className="portal-list">
-              {bookings.map((booking) => (
-                <li key={String(booking.id)}>
-                  <strong>{String(booking.reference_number)}</strong>
-                  <span>{String(booking.status)}</span>
+          {portal.recentBookings.length ? (
+            <ul className="account-booking-list">
+              {portal.recentBookings.map((booking) => (
+                <li key={booking.id}>
+                  <div>
+                    <Link href={booking.href} className="account-booking-list__title">
+                      {booking.experience}
+                    </Link>
+                    <p>
+                      {booking.reference}
+                      {" \u00B7 "}
+                      {booking.packageLabel}
+                    </p>
+                    <p>{booking.whenLabel}</p>
+                  </div>
+                  <div className="account-booking-list__meta">
+                    <span className="account-status">{booking.statusLabel}</span>
+                    <span>{booking.paymentLabel}</span>
+                    <strong>{booking.balanceLabel}</strong>
+                    <Link href={booking.href}>
+                      Details
+                      <ArrowRight size={14} aria-hidden="true" />
+                    </Link>
+                  </div>
                 </li>
               ))}
             </ul>
           ) : (
-            <p>No confirmed bookings yet. Direct scheduling stays disabled until availability and payments are configured.</p>
+            <div className="account-empty">
+              <p>No bookings on this account yet.</p>
+              <Button href="/booking" variant="secondary" size="sm">
+                Start a booking
+              </Button>
+            </div>
           )}
-          <Button href="/account/bookings" variant="outline">View bookings</Button>
+        </article>
+
+        <article className="portal-card">
+          <div className="portal-card__head">
+            <UserRound size={22} aria-hidden="true" />
+            <div>
+              <h2>Profile</h2>
+              <p>
+                {portal.profileComplete
+                  ? "Your contact details are ready for booking follow-up."
+                  : "Add your name and phone so we can reach you about your events."}
+              </p>
+            </div>
+          </div>
+          <Button href="/account/profile" variant="secondary">
+            Manage profile
+          </Button>
+        </article>
+
+        <article className="portal-card">
+          <div className="portal-card__head">
+            <Package size={22} aria-hidden="true" />
+            <div>
+              <h2>Shop orders</h2>
+              <p>
+                {portal.orders.length
+                  ? "Recent shop purchases tied to your email."
+                  : "Shop orders will appear here when the storefront is live and you check out."}
+              </p>
+            </div>
+          </div>
+          {portal.orders.length ? (
+            <ul className="portal-list">
+              {portal.orders.map((order) => (
+                <li key={order.id}>
+                  <div>
+                    <strong>{order.reference}</strong>
+                    <span className="account-muted">{order.createdLabel}</span>
+                  </div>
+                  <div className="account-booking-list__meta">
+                    <span className="account-status">{order.statusLabel}</span>
+                    <strong>{order.totalLabel}</strong>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <Button href="/shop" variant="outline" size="sm">
+              Visit the shop
+            </Button>
+          )}
         </article>
 
         <article className="portal-card portal-card--wide">
-          <ClipboardList size={22} aria-hidden="true" />
-          <h2>Inquiry history</h2>
-          {inquiries?.length ? (
-            <ul className="portal-list">
-              {inquiries.map((inquiry) => (
-                <li key={String(inquiry.reference_number)}>
-                  <strong>{String(inquiry.reference_number)}</strong>
-                  <span>{String(inquiry.inquiry_status)}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>Historical inquiry claiming is deferred until email ownership can be verified safely. New signed-in inquiries can be attached to this account.</p>
-          )}
+          <div className="portal-card__head">
+            <ClipboardList size={22} aria-hidden="true" />
+            <div>
+              <h2>Inquiries</h2>
+              <p>
+                {portal.inquiryCount > 0
+                  ? `You have ${portal.inquiryCount} inquiry record${
+                      portal.inquiryCount === 1 ? "" : "s"
+                    } linked to this account.`
+                  : "Custom-event inquiries submitted while signed in will be saved here."}
+              </p>
+            </div>
+          </div>
+          <Button href="/booking/inquiry" variant="outline" size="sm">
+            Start an inquiry
+          </Button>
         </article>
       </div>
     </section>

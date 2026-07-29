@@ -4,6 +4,11 @@ import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { requireWorkspaceMembership } from "@/lib/launchpoint/auth";
 import { formatUsdFromCents } from "@/data/booking-catalog";
 import { Button } from "@/components/ui/Button";
+import { claimBookingsForVerifiedEmail } from "@/lib/booking-wizard/claim-bookings";
+import {
+  bookingStatusLabel,
+  paymentStatusLabel
+} from "@/lib/admin/booking-status";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +20,11 @@ export const metadata = createPageMetadata({
 
 export default async function AccountBookingsPage() {
   const context = await requireWorkspaceMembership(undefined, "/account/bookings");
+  await claimBookingsForVerifiedEmail({
+    userId: context.userId,
+    email: context.email
+  });
+
   const admin = getSupabaseAdminClient();
   const { data: bookings } = admin
     ? await admin
@@ -48,6 +58,9 @@ export default async function AccountBookingsPage() {
       <p className="eyebrow">Bookings</p>
       <h1 id="bookings-title">Your bookings</h1>
       <p>
+        Only bookings verified to your signed-in email appear here.
+      </p>
+      <p>
         <Button href="/booking" variant="outline" size="sm">
           Book another experience
         </Button>
@@ -57,8 +70,8 @@ export default async function AccountBookingsPage() {
         <div className="empty-state">
           <h2 className="empty-state__title">No bookings yet</h2>
           <p className="empty-state__description">
-            When you reserve a fragrance experience, it will appear here with payment and event
-            details.
+            When you reserve a fragrance experience with this email, it will appear here after you
+            sign in from the confirmation invite.
           </p>
           <Button href="/booking" variant="primary">
             Start booking
@@ -102,18 +115,32 @@ function BookingGroup({
             <tr key={String(booking.id)}>
               <td>{String(booking.reference_number)}</td>
               <td style={{ textTransform: "capitalize" }}>
-                {String(booking.experience_slug ?? "—").replaceAll("-", " ")}
+                {String(booking.experience_slug ?? "\u2014").replaceAll("-", " ")}
               </td>
-              <td>{String(booking.status)}</td>
-              <td>{String(booking.payment_status)}</td>
+              <td>
+                {bookingStatusLabel(
+                  String(booking.status),
+                  booking.payment_status ? String(booking.payment_status) : null
+                )}
+              </td>
+              <td>
+                {paymentStatusLabel(String(booking.payment_status ?? "pending"))}
+              </td>
               <td>
                 {booking.start_at
-                  ? new Date(String(booking.start_at)).toLocaleString()
+                  ? new Date(String(booking.start_at)).toLocaleString("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "short"
+                    })
                   : "Not scheduled"}
               </td>
               <td>{formatUsdFromCents(Number(booking.remaining_balance_cents ?? 0))}</td>
               <td>
-                <Link href="/contact">Contact</Link>
+                <Link
+                  href={`/account/bookings/${encodeURIComponent(String(booking.reference_number))}`}
+                >
+                  Details
+                </Link>
               </td>
             </tr>
           ))}

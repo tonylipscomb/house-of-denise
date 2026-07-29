@@ -29,6 +29,7 @@ export type HomePillar = {
 export type TrustHighlight = {
   id: string;
   label: string;
+  description?: string;
   icon: LucideIcon;
 };
 
@@ -52,28 +53,47 @@ export type HomeTestimonial = {
 };
 
 /* Image map for the homepage redesign.
- * Hero: /images/house-of-denise/hero-editorial.jpg (from mobilefragrancebar.png)
+ * Hero: /images/house-of-denise/hero-signature.jpg (from heroimage.png)
  * Featured cards use dedicated service images.
- * Signature: /images/house-of-denise/signature-experience.jpg (from gifts.png)
+ * Signature: /images/house-of-denise/signature-elegant.jpg (from elegant.png)
  * CTA: /images/house-of-denise/cta-editorial.jpg (from privateevents.png)
- * Replace hero-editorial later with a dedicated wide lifestyle shoot if available.
  */
 
 export const heroContent = {
-  eyebrow: "LUXURY FRAGRANCE EXPERIENCES",
-  headingLines: ["Scents that celebrate.", "Experiences that connect."],
-  body: "House of Denise creates elevated fragrance experiences, from luxury workshops and private events to mobile fragrance bars—designed for connection, self-care, and unforgettable celebrations.",
-  primaryCta: { label: "Explore Experiences", href: "/experiences" },
-  secondaryCta: { label: "Book Private Event", href: "/private-events" },
-  trustHighlights: [
-    { id: "bespoke", label: "Bespoke & Luxurious", icon: Sparkles },
-    { id: "intentional", label: "Intentional & Memorable", icon: HeartHandshake },
-    { id: "crafted", label: "Crafted With Care", icon: HandHeart }
+  eyebrow: "OUR SIGNATURE",
+  heading: "The House of Denise Experience",
+  body: "More than a fragrance bar — it's an experience designed to bring people together, spark creativity, and leave a lasting impression.",
+  primaryCta: { label: "Discover Our Story", href: "/our-story" },
+  features: [
+    {
+      id: "scents",
+      label: "Curated Scents",
+      description: "Hand-selected blends that inspire",
+      icon: FlaskConical
+    },
+    {
+      id: "moments",
+      label: "Meaningful Moments",
+      description: "Experiences that leave lasting memories",
+      icon: HandHeart
+    },
+    {
+      id: "joy",
+      label: "Shared Joy",
+      description: "Perfect for gatherings of all kinds",
+      icon: Users
+    },
+    {
+      id: "gifting",
+      label: "Thoughtful Gifting",
+      description: "Beautiful keepsakes for every guest",
+      icon: Gift
+    }
   ] as TrustHighlight[],
   image: {
-    src: "/images/house-of-denise/hero-editorial.jpg",
-    alt: "House of Denise mobile fragrance bar with perfume bottles, florals, and candlelight",
-    position: "center 45%"
+    src: "/images/house-of-denise/hero-signature.jpg",
+    alt: "House of Denise signature scent bar with perfume bottles, framed signage, and candlelight",
+    position: "center center"
   }
 } as const;
 
@@ -100,7 +120,7 @@ export const homePillars: HomePillar[] = [
       "We bring the fragrance experience to you—perfect for celebrations, markets, brand activations, pop-ups, and more.",
     href: "/perfume-bar",
     linkLabel: "Learn More",
-    imageSrc: "/images/house-of-denise/mobile-fragrance-bar.jpg",
+    imageSrc: "/images/house-of-denise/mobile-fragrance-bar.png",
     imageAlt: "Mobile fragrance bar with perfume bottles, florals, and scent testing strips",
     imagePosition: "center",
     icon: FlaskConical
@@ -147,8 +167,8 @@ export const signatureExperience = {
   eyebrow: "OUR SIGNATURE",
   heading: "The House of Denise Experience",
   body: "We believe fragrance is more than a scent—it is a feeling, a memory, and a moment of connection. Our experiences blend luxury, creativity, and intention to help guests slow down, celebrate, and create something uniquely their own.",
-  imageSrc: "/images/house-of-denise/signature-experience.jpg",
-  imageAlt: "House of Denise gift packaging with perfume bottle, ribbon, and dried florals",
+  imageSrc: "/images/house-of-denise/signature-elegant.jpg",
+  imageAlt: "Elegant House of Denise fragrance styling with perfume and gift packaging",
   features: [
     { id: "materials", label: "Premium Materials", icon: Sparkles },
     { id: "guidance", label: "Thoughtful Guidance", icon: ShieldCheck },
@@ -310,7 +330,7 @@ export type InstagramImage = {
 export const instagramGallery: InstagramImage[] = [
   {
     id: "gallery-fragrance",
-    imageSrc: "/images/house-of-denise/mobile-fragrance-bar.jpg",
+    imageSrc: "/images/house-of-denise/mobile-fragrance-bar.png",
     imageAlt: "Fragrance bottles arranged for a House Of Denise experience",
     imagePosition: "center",
     size: "tall"

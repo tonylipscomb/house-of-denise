@@ -88,6 +88,8 @@ export function BookingWizardProvider({
         }
       });
     }
+    // Hydration intentionally completes after restoring the external browser draft.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHydrated(true);
   }, [initialCustomer]);
 

@@ -1,11 +1,20 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { getExperience, getPackage, getUpgrade } from "@/data/booking-catalog";
 import { buildStartEndIso, getSlotsForDate } from "@/lib/booking-wizard/availability";
-import { calculateBookingPricing } from "@/lib/booking-wizard/pricing";
+import { calculateBookingPricingResolved } from "@/lib/booking-wizard/pricing-resolved";
+import {
+  catalogGetExperience,
+  catalogGetPackage,
+  catalogGetUpgrade,
+  getResolvedBookingCatalog
+} from "@/lib/booking-wizard/resolved-catalog";
 import type { BookingWizardState } from "@/lib/booking-wizard/types";
 import { HOUSE_OF_DENISE_WORKSPACE_ID } from "@/lib/launchpoint/constants";
-import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { requireSupabaseAdminClient } from "@/lib/supabase/admin";
+import {
+  classifySupabaseClientError,
+  SupabaseConfigError
+} from "@/lib/supabase/env";
 
 export type CreatePendingBookingInput = {
   state: BookingWizardState;
@@ -17,7 +26,7 @@ export type PendingBookingResult = {
   bookingId: string;
   referenceNumber: string;
   amountDueTodayCents: number;
-  pricing: ReturnType<typeof calculateBookingPricing>;
+  pricing: Awaited<ReturnType<typeof calculateBookingPricingResolved>>;
   alreadyExisted: boolean;
 };
 
@@ -29,27 +38,41 @@ function generateBookingReference(): string {
 export async function createPendingBookingFromWizard(
   input: CreatePendingBookingInput
 ): Promise<PendingBookingResult> {
-  const admin = getSupabaseAdminClient();
-  if (!admin) {
-    throw new Error("Booking storage is not configured.");
+  let admin;
+  try {
+    admin = requireSupabaseAdminClient();
+  } catch (error) {
+    if (error instanceof SupabaseConfigError) throw error;
+    throw new SupabaseConfigError(
+      "missing_service_role_key",
+      "Booking storage is not configured. Check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."
+    );
   }
 
   const { state, customerId, idempotencyKey } = input;
+  const catalog = await getResolvedBookingCatalog();
 
-  const { data: existing } = await admin
+  const { data: existing, error: existingError } = await admin
     .from("bookings")
     .select("id, reference_number, subtotal_cents, deposit_amount_cents, payment_option, remaining_balance_due_at")
     .eq("checkout_idempotency_key", idempotencyKey)
     .maybeSingle();
 
+  if (existingError) {
+    throw classifySupabaseClientError(existingError.message);
+  }
+
   if (existing) {
-    const pricing = calculateBookingPricing({
-      experienceId: state.selectedExperienceId,
-      packageId: state.selectedPackageId,
-      selectedUpgrades: state.selectedUpgrades,
-      paymentOption: state.paymentOption,
-      eventDateIso: state.schedule.date
-    });
+    const pricing = await calculateBookingPricingResolved(
+      {
+        experienceId: state.selectedExperienceId,
+        packageId: state.selectedPackageId,
+        selectedUpgrades: state.selectedUpgrades,
+        paymentOption: state.paymentOption,
+        eventDateIso: state.schedule.date
+      },
+      catalog
+    );
     return {
       bookingId: existing.id,
       referenceNumber: existing.reference_number,
@@ -59,8 +82,8 @@ export async function createPendingBookingFromWizard(
     };
   }
 
-  const experience = getExperience(state.selectedExperienceId);
-  const pkg = getPackage(state.selectedPackageId);
+  const experience = catalogGetExperience(catalog, state.selectedExperienceId);
+  const pkg = catalogGetPackage(catalog, state.selectedPackageId);
   if (!experience || !pkg) {
     throw new Error("Experience and package are required.");
   }
@@ -81,7 +104,6 @@ export async function createPendingBookingFromWizard(
     throw new Error("The selected time is no longer available.");
   }
 
-  // Overlap guard: reject if another pending/confirmed booking shares the slot window
   const window = buildStartEndIso({
     dateIso: state.schedule.date,
     slot,
@@ -101,13 +123,38 @@ export async function createPendingBookingFromWizard(
     throw new Error("That date and time was just reserved. Please choose another time.");
   }
 
-  const pricing = calculateBookingPricing({
-    experienceId: experience.id,
-    packageId: pkg.id,
-    selectedUpgrades: state.selectedUpgrades,
-    paymentOption: state.paymentOption,
-    eventDateIso: state.schedule.date
-  });
+  // Honor admin calendar blocks (skip check if Phase 2 tables are not migrated yet)
+  const { data: blocks, error: blocksError } = await admin
+    .from("calendar_blocks")
+    .select("id, all_day, block_date, start_at, end_at")
+    .eq("workspace_id", HOUSE_OF_DENISE_WORKSPACE_ID);
+
+  if (!blocksError) {
+    const blocked = (blocks ?? []).some((block) => {
+      if (block.all_day && block.block_date) {
+        return block.block_date === state.schedule.date;
+      }
+      if (block.start_at && block.end_at) {
+        return block.start_at < window.endAt && block.end_at > window.startAt;
+      }
+      return false;
+    });
+
+    if (blocked) {
+      throw new Error("That date is unavailable. Please choose another date.");
+    }
+  }
+
+  const pricing = await calculateBookingPricingResolved(
+    {
+      experienceId: experience.id,
+      packageId: pkg.id,
+      selectedUpgrades: state.selectedUpgrades,
+      paymentOption: state.paymentOption,
+      eventDateIso: state.schedule.date
+    },
+    catalog
+  );
 
   if (pricing.amountDueTodayCents <= 0) {
     throw new Error("Unable to create checkout for this selection.");
@@ -156,12 +203,12 @@ export async function createPendingBookingFromWizard(
   });
 
   if (bookingError) {
-    throw new Error(`Unable to create booking: ${bookingError.message}`);
+    throw classifySupabaseClientError(bookingError.message);
   }
 
   if (state.selectedUpgrades.length > 0) {
     const rows = state.selectedUpgrades.map((selected) => {
-      const upgrade = getUpgrade(selected.id)!;
+      const upgrade = catalogGetUpgrade(catalog, selected.id)!;
       const quantity = upgrade.allowQuantity ? selected.quantity : 1;
       const quoted = upgrade.priceCents === null;
       return {
@@ -179,7 +226,7 @@ export async function createPendingBookingFromWizard(
 
     const { error: upgradeError } = await admin.from("booking_upgrades").insert(rows);
     if (upgradeError) {
-      throw new Error(`Unable to save upgrades: ${upgradeError.message}`);
+      throw classifySupabaseClientError(upgradeError.message);
     }
   }
 

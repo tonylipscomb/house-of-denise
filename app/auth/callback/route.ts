@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureHouseOfDeniseCustomer } from "@/lib/launchpoint/auth";
+import { claimBookingsForVerifiedEmail } from "@/lib/booking-wizard/claim-bookings";
 
 function safeNext(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) return "/account";
@@ -16,7 +17,15 @@ export async function GET(request: NextRequest) {
   if (code && supabase) {
     const { data } = await supabase.auth.exchangeCodeForSession(code);
     if (data.user) {
-      await ensureHouseOfDeniseCustomer(data.user.id, data.user.email ?? null, data.user.user_metadata?.full_name);
+      await ensureHouseOfDeniseCustomer(
+        data.user.id,
+        data.user.email ?? null,
+        data.user.user_metadata?.full_name
+      );
+      await claimBookingsForVerifiedEmail({
+        userId: data.user.id,
+        email: data.user.email
+      });
     }
   }
 

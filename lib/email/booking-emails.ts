@@ -91,7 +91,7 @@ export async function sendOwnerBookingNotification(input: BookingEmailInput) {
     ["Deposit status", record.depositStatus]
   ];
 
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: config.from,
     to: config.notificationEmail,
     replyTo: record.email,
@@ -107,6 +107,7 @@ ${textRows(rows)}`,
       <table role="presentation" style="width:100%;border-collapse:collapse;">${detailRows(rows)}</table>`
     )
   });
+  if (error) throw new Error(error.message || "Resend failed to send owner inquiry email.");
 }
 
 export async function sendCustomerBookingConfirmation(input: BookingEmailInput) {
@@ -123,7 +124,7 @@ export async function sendCustomerBookingConfirmation(input: BookingEmailInput) 
     ["Selected experience", record.experienceFormat]
   ];
 
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: config.from,
     to: record.email,
     replyTo: config.replyTo,
@@ -145,4 +146,5 @@ Questions: info@houseofdenise.com or 804-850-4222`,
       <p style="margin:0;color:#6f6259;line-height:1.6;">Questions: info@houseofdenise.com or 804-850-4222</p>`
     )
   });
+  if (error) throw new Error(error.message || "Resend failed to send customer inquiry email.");
 }

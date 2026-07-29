@@ -70,7 +70,15 @@ export type BookingInquirySubmissionPayload = BookingInquiryFormData & {
 
 export type BookingInquiryRecord = Omit<BookingInquiryFormData, "estimatedGuestCount"> & {
   estimatedGuestCount: number;
-  inquiryStatus: "new" | "reviewing" | "followed-up" | "closed";
+  inquiryStatus:
+    | "new"
+    | "reviewing"
+    | "followed-up"
+    | "closed"
+    | "contacted"
+    | "consultation_scheduled"
+    | "proposal_sent"
+    | "converted";
   depositStatus: "not_requested" | "pending" | "paid" | "waived";
   squareCheckoutReference: string | null;
   squarePaymentReference: string | null;

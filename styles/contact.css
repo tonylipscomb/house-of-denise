@@ -1,0 +1,212 @@
+/* Contact page — editorial luxury layout */
+
+.lux-contact {
+  background: var(--color-cream);
+}
+
+.lux-contact__intro {
+  padding-block: clamp(2.75rem, 6vw, 4.5rem) clamp(1.5rem, 3vw, 2.25rem);
+  background:
+    radial-gradient(ellipse at 12% 20%, rgba(184, 138, 77, 0.12), transparent 45%),
+    linear-gradient(180deg, #faf7f2 0%, var(--color-cream) 100%);
+}
+
+.lux-contact__intro-inner {
+  max-width: 42rem;
+}
+
+.lux-contact__intro h1 {
+  margin: 0;
+  color: var(--color-espresso);
+  font-size: clamp(2.3rem, 1.7rem + 2vw, 3.5rem);
+  line-height: 1.12;
+  font-weight: 500;
+}
+
+.lux-contact__intro p:last-child {
+  margin: 1rem 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+  line-height: 1.7;
+  max-width: 40ch;
+}
+
+.lux-contact__body {
+  padding-bottom: clamp(3rem, 7vw, 5.5rem);
+}
+
+.lux-contact__layout {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-items: start;
+}
+
+.lux-contact__aside {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1.35rem, 2.5vw, 1.85rem);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: rgba(255, 253, 252, 0.72);
+}
+
+.lux-contact__aside h2,
+.lux-contact__panel h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 1.2rem + 0.6vw, 1.75rem);
+  font-weight: 500;
+  color: var(--color-espresso);
+}
+
+.lux-contact__aside > p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.lux-contact__details {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.95rem;
+}
+
+.lux-contact__details li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.lux-contact__icon {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  background: rgba(184, 138, 77, 0.12);
+  color: var(--color-gold);
+}
+
+.lux-contact__details strong {
+  display: block;
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 0.2rem;
+}
+
+.lux-contact__details a,
+.lux-contact__details span {
+  color: var(--color-espresso);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.lux-contact__details a:hover {
+  color: var(--color-gold);
+}
+
+.lux-contact__aside-cta {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.lux-contact__aside-cta p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.lux-contact__inline-link {
+  color: var(--color-gold);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  width: fit-content;
+}
+
+.lux-contact__inline-link:hover {
+  color: var(--color-espresso);
+}
+
+.lux-contact__panel {
+  display: grid;
+  gap: 1.15rem;
+  padding: clamp(1.35rem, 2.5vw, 2rem);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-ivory);
+  box-shadow: var(--shadow-sm);
+}
+
+.lux-contact__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.lux-contact__form .field-control,
+.lux-contact__form input,
+.lux-contact__form textarea {
+  min-height: 48px;
+  border-radius: var(--radius-md);
+  border-color: var(--color-border);
+  background: #fff;
+}
+
+.lux-contact__form textarea.field-control,
+.lux-contact__form textarea {
+  min-height: 140px;
+}
+
+.lux-contact__form .field-control:focus,
+.lux-contact__form input:focus,
+.lux-contact__form textarea:focus {
+  outline: none;
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px rgba(184, 138, 77, 0.18);
+}
+
+.lux-contact__error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--text-sm);
+}
+
+.lux-contact__success {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(184, 138, 77, 0.35);
+  border-radius: var(--radius-lg);
+  background: rgba(248, 243, 236, 0.65);
+}
+
+.lux-contact__success h3 {
+  margin: 0;
+  font-family: var(--font-serif);
+  color: var(--color-espresso);
+}
+
+.lux-contact__success p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+@media (min-width: 960px) {
+  .lux-contact__layout {
+    grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.25fr);
+    gap: clamp(1.75rem, 3vw, 2.75rem);
+  }
+
+  .lux-contact__aside {
+    position: sticky;
+    top: calc(var(--header-height) + 1.25rem);
+  }
+}

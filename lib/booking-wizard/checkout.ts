@@ -1,11 +1,17 @@
 import "server-only";
+
 import { randomUUID } from "node:crypto";
-import { getExperience, getPackage } from "@/data/booking-catalog";
 import { createPendingBookingFromWizard } from "@/lib/booking-wizard/create-pending-booking";
+import {
+  catalogGetExperience,
+  catalogGetPackage,
+  getResolvedBookingCatalog,
+} from "@/lib/booking-wizard/resolved-catalog";
 import type { BookingWizardState } from "@/lib/booking-wizard/types";
-import { getSquareClient } from "@/lib/square/client";
-import { getSquareConfig } from "@/lib/square/config";
+import { getStripeClient } from "@/lib/stripe/client";
+import { getStripeConfig } from "@/lib/stripe/config";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { classifySupabaseClientError } from "@/lib/supabase/env";
 
 export type BookingCheckoutRequest = {
   state: BookingWizardState;
@@ -13,74 +19,121 @@ export type BookingCheckoutRequest = {
   idempotencyKey: string;
 };
 
-export async function createBookingSquareCheckout(input: BookingCheckoutRequest) {
+export async function createBookingStripeCheckout(
+  input: BookingCheckoutRequest,
+) {
   const pending = await createPendingBookingFromWizard(input);
-  const experience = getExperience(input.state.selectedExperienceId);
-  const pkg = getPackage(input.state.selectedPackageId);
+  const catalog = await getResolvedBookingCatalog();
+  const experience = catalogGetExperience(
+    catalog,
+    input.state.selectedExperienceId,
+  );
+  const pkg = catalogGetPackage(catalog, input.state.selectedPackageId);
+
   if (!experience || !pkg) {
     throw new Error("Invalid booking selection.");
   }
 
-  const config = getSquareConfig();
-  const square = getSquareClient();
+  const stripe = getStripeClient();
+  const config = getStripeConfig();
   const amount = pending.amountDueTodayCents;
+
   const paymentLabel =
     input.state.paymentOption === "full"
-      ? `${experience.title} — ${pkg.name} (Paid in Full)`
-      : `${experience.title} — ${pkg.name} (Deposit)`;
+      ? `${experience.title} \u2014 ${pkg.name} (Paid in Full)`
+      : `${experience.title} \u2014 ${pkg.name} (Deposit)`;
 
-  const response = await square.checkout.paymentLinks.create({
-    idempotencyKey: input.idempotencyKey,
-    description: `House of Denise booking ${pending.referenceNumber}`,
-    order: {
-      locationId: config.locationId,
-      referenceId: pending.referenceNumber,
-      lineItems: [
+  const session = await stripe.checkout.sessions.create(
+    {
+      mode: "payment",
+      success_url:
+        `${config.siteUrl}/booking/confirmation` +
+        `?reference=${encodeURIComponent(pending.referenceNumber)}` +
+        "&session_id={CHECKOUT_SESSION_ID}",
+      cancel_url:
+        `${config.siteUrl}/booking` +
+        `?checkout=cancelled&reference=${encodeURIComponent(pending.referenceNumber)}`,
+      client_reference_id: pending.referenceNumber,
+      customer_email: input.state.customer.email,
+      phone_number_collection: {
+        enabled: true,
+      },
+      line_items: [
         {
-          name: paymentLabel,
-          quantity: "1",
-          note: `Guests: ${input.state.eventDetails.guestCount ?? "n/a"} · ${input.state.schedule.date} ${input.state.schedule.timeLabel ?? ""}`.trim(),
-          basePriceMoney: {
-            amount: BigInt(amount),
-            currency: "USD"
-          }
-        }
-      ]
+          quantity: 1,
+          price_data: {
+            currency: "usd",
+            unit_amount: amount,
+            product_data: {
+              name: paymentLabel,
+              description:
+                `${input.state.eventDetails.guestCount ?? "N/A"} guests \u00B7 ` +
+                `${input.state.schedule.date ?? ""} ` +
+                `${input.state.schedule.timeLabel ?? ""}`.trim(),
+              metadata: {
+                booking_reference: pending.referenceNumber,
+                experience_slug: experience.slug,
+                package_id: pkg.id,
+              },
+            },
+          },
+        },
+      ],
+      metadata: {
+        payment_kind: "booking",
+        booking_id: pending.bookingId,
+        booking_reference: pending.referenceNumber,
+        payment_option: input.state.paymentOption,
+        amount_due_today_cents: String(amount),
+      },
+      payment_intent_data: {
+        metadata: {
+          payment_kind: "booking",
+          booking_id: pending.bookingId,
+          booking_reference: pending.referenceNumber,
+          payment_option: input.state.paymentOption,
+        },
+      },
     },
-    checkoutOptions: {
-      redirectUrl: `${config.siteUrl}/booking/confirmation?reference=${encodeURIComponent(pending.referenceNumber)}`,
-      askForShippingAddress: false
+    {
+      idempotencyKey: input.idempotencyKey,
     },
-    prePopulatedData: {
-      buyerEmail: input.state.customer.email,
-      buyerPhoneNumber: input.state.customer.phone || undefined
-    },
-    paymentNote: `House of Denise booking ${pending.referenceNumber}`
-  });
+  );
 
-  const paymentLink = response.paymentLink;
-  const checkoutUrl = paymentLink?.longUrl ?? paymentLink?.url;
-  if (!paymentLink?.id || !checkoutUrl) {
-    throw new Error("Square did not return a usable checkout link.");
+  if (!session.id || !session.url) {
+    throw new Error("Stripe did not return a usable checkout session.");
   }
 
   const admin = getSupabaseAdminClient();
+
   if (admin) {
-    await admin
+    const { error } = await admin
       .from("bookings")
       .update({
-        square_checkout_id: paymentLink.id,
-        square_payment_link_url: checkoutUrl,
-        updated_at: new Date().toISOString()
+        stripe_checkout_session_id: session.id,
+        stripe_payment_intent_id:
+          typeof session.payment_intent === "string"
+            ? session.payment_intent
+            : null,
+        stripe_checkout_url: session.url,
+        payment_provider: "stripe",
+        status: "payment_pending",
+        payment_status: "pending",
+        updated_at: new Date().toISOString(),
       })
       .eq("id", pending.bookingId);
+
+    if (error) {
+      throw classifySupabaseClientError(error.message);
+    }
   }
 
   return {
-    checkoutUrl,
+    checkoutUrl: session.url,
     reference: pending.referenceNumber,
     bookingId: pending.bookingId,
-    amountDueTodayCents: amount
+    amountDueTodayCents: amount,
+    provider: "stripe" as const,
   };
 }
 

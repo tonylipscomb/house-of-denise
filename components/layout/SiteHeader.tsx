@@ -109,17 +109,19 @@ export function SiteHeader() {
             >
               Book Experience
             </Button>
-            <Link
-              href="/account"
-              className="lux-header__icon desktop-only"
-              aria-label="Account"
-            >
-              <UserRound size={20} strokeWidth={1.75} aria-hidden="true" />
-            </Link>
-            <Link href="/cart" className="lux-header__icon lux-header__cart" aria-label="Cart">
-              <ShoppingBag size={21} strokeWidth={1.75} aria-hidden="true" />
-              <CartCount />
-            </Link>
+            <div className="lux-header__icons">
+              <Link
+                href="/account"
+                className="lux-header__icon desktop-only"
+                aria-label="Account"
+              >
+                <UserRound size={20} strokeWidth={1.75} aria-hidden="true" />
+              </Link>
+              <Link href="/cart" className="lux-header__icon lux-header__cart" aria-label="Cart">
+                <ShoppingBag size={21} strokeWidth={1.75} aria-hidden="true" />
+                <CartCount />
+              </Link>
+            </div>
           </div>
         </div>
       </header>

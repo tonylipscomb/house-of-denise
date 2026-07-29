@@ -12,20 +12,37 @@ export class EmailConfigurationError extends Error {
 }
 
 export function getResendClient() {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) return null;
 
   cachedResend ??= new Resend(apiKey);
   return cachedResend;
 }
 
-export function getBookingEmailConfig() {
-  const from = process.env.BOOKING_FROM_EMAIL;
-  const notificationEmail = process.env.BOOKING_NOTIFICATION_EMAIL;
-  const replyTo = process.env.BOOKING_REPLY_TO_EMAIL || "info@houseofdenise.com";
+export function getMissingEmailConfigKeys() {
+  const missing: string[] = [];
+  if (!process.env.RESEND_API_KEY?.trim()) missing.push("RESEND_API_KEY");
+  if (!process.env.BOOKING_FROM_EMAIL?.trim()) missing.push("BOOKING_FROM_EMAIL");
+  if (!process.env.BOOKING_NOTIFICATION_EMAIL?.trim()) {
+    missing.push("BOOKING_NOTIFICATION_EMAIL");
+  }
+  return missing;
+}
 
-  if (!from || !notificationEmail) {
-    throw new EmailConfigurationError();
+export function getBookingEmailConfig() {
+  const from = process.env.BOOKING_FROM_EMAIL?.trim();
+  const notificationEmail = process.env.BOOKING_NOTIFICATION_EMAIL?.trim();
+  const replyTo =
+    process.env.BOOKING_REPLY_TO_EMAIL?.trim() || "info@houseofdenise.com";
+
+  const missing = getMissingEmailConfigKeys();
+  if (missing.length > 0 || !from || !notificationEmail) {
+    throw new EmailConfigurationError(
+      `Booking email is not configured. Missing: ${(missing.length
+        ? missing
+        : ["BOOKING_FROM_EMAIL", "BOOKING_NOTIFICATION_EMAIL"]
+      ).join(", ")}.`
+    );
   }
 
   return {

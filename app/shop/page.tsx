@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Gift, Heart, Lock, Mail, Sparkles } from "lucide-react";
 import { ShopNotifyForm } from "@/components/shop/ShopNotifyForm";
+import { isShopEnabled } from "@/lib/shop-flag";
 
 const greatVibes = Great_Vibes({
   subsets: ["latin"],
@@ -85,14 +86,18 @@ function Flourish({ className }: { className?: string }) {
 }
 
 export default function ShopPage() {
+  // Public storefront stays Coming Soon until Phase 3.
+  // NEXT_PUBLIC_SHOP_ENABLED defaults to false and must never auto-enable.
+  void isShopEnabled();
+
   return (
     <div className={`shop-soon ${greatVibes.variable}`}>
       <section className="shop-soon__hero" aria-labelledby="shop-soon-title">
-        <div className="shop-soon__hero-copy lux-reveal is-revealed">
+        <div className="shop-soon__hero-copy">
           <p className="lux-eyebrow shop-soon__eyebrow">Shop</p>
           <h1 id="shop-soon-title" className="shop-soon__title">
-            Something beautiful{" "}
-            <em className="shop-soon__title-script">is on the way</em>
+            <span className="shop-soon__title-main">Something beautiful</span>
+            <span className="shop-soon__title-script">is on the way</span>
           </h1>
           <Flourish className="shop-soon__flourish" />
           <p className="shop-soon__lead">

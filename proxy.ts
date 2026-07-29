@@ -7,8 +7,13 @@ function safeNext(pathname: string) {
   return pathname.startsWith("/") && !pathname.startsWith("//") ? pathname : "/";
 }
 
+function isPublicAdminPath(pathname: string) {
+  return pathname === "/admin/login" || pathname.startsWith("/admin/login/");
+}
+
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -22,18 +27,24 @@ export async function proxy(request: NextRequest) {
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
         response = NextResponse.next({ request });
-        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options)
+        );
       }
     }
   });
 
   const { data } = await supabase.auth.getUser();
-  const isProtected = protectedPrefixes.some((prefix) => request.nextUrl.pathname === prefix || request.nextUrl.pathname.startsWith(`${prefix}/`));
+  const pathname = request.nextUrl.pathname;
+  const isProtected =
+    protectedPrefixes.some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+    ) && !isPublicAdminPath(pathname);
 
   if (isProtected && !data.user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("next", safeNext(request.nextUrl.pathname));
+    url.pathname = pathname.startsWith("/admin") ? "/admin/login" : "/login";
+    url.searchParams.set("next", safeNext(pathname));
     return NextResponse.redirect(url);
   }
 
@@ -41,5 +52,11 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/account/:path*", "/admin/:path*", "/auth/callback"]
+  matcher: [
+    "/account",
+    "/account/:path*",
+    "/admin",
+    "/admin/:path*",
+    "/auth/callback"
+  ]
 };

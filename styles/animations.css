@@ -1,13 +1,5 @@
 /* Premium motion — keep restrained and respect reduced motion */
 
-.lux-hero__animate {
-  animation: lux-fade-up var(--duration-slow) var(--ease-out) both;
-}
-
-.lux-hero__media {
-  animation: lux-fade-in calc(var(--duration-slow) + 120ms) var(--ease-out) both;
-}
-
 .lux-reveal {
   opacity: 0;
   transform: translateY(18px);
