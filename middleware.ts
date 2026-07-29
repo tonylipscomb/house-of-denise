@@ -11,7 +11,7 @@ function isPublicAdminPath(pathname: string) {
   return pathname === "/admin/login" || pathname.startsWith("/admin/login/");
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
