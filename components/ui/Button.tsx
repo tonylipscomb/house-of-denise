@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "text" | "destructive";
+type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "text" | "destructive" | "gold";
 type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 type ButtonBaseProps = {
@@ -35,7 +35,8 @@ const variantClass: Record<ButtonVariant, string> = {
   outline: "btn--outline",
   ghost: "btn--ghost",
   text: "btn--text",
-  destructive: "btn--destructive"
+  destructive: "btn--destructive",
+  gold: "btn--gold"
 };
 
 const sizeClass: Record<ButtonSize, string> = {

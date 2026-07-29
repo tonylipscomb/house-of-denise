@@ -1,0 +1,74 @@
+/* Premium motion — keep restrained and respect reduced motion */
+
+.lux-hero__animate {
+  animation: lux-fade-up var(--duration-slow) var(--ease-out) both;
+}
+
+.lux-hero__media {
+  animation: lux-fade-in calc(var(--duration-slow) + 120ms) var(--ease-out) both;
+}
+
+.lux-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.lux-reveal.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes lux-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lux-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lux-drawer-in {
+  from {
+    transform: translateX(-105%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lux-hero__animate,
+  .lux-hero__media {
+    animation: none;
+  }
+
+  .lux-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .lux-card:hover,
+  .btn:hover:not(:disabled):not(.btn--disabled) {
+    transform: none;
+  }
+
+  .lux-card:hover .lux-card__image {
+    transform: none;
+  }
+}

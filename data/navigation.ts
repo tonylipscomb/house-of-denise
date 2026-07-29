@@ -10,6 +10,7 @@ export type BookingNavItem = {
 };
 
 export const primaryNav: NavItem[] = [
+  { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
   { label: "Experiences", href: "/experiences" },
   { label: "Workshops", href: "/workshops" },

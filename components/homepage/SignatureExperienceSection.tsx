@@ -1,43 +1,46 @@
 import Image from "next/image";
-import { Check } from "lucide-react";
 import { signatureExperience } from "@/data/home-content";
 import { Button } from "@/components/ui/Button";
-import { Container } from "@/components/ui/Container";
-import { Section } from "@/components/ui/Section";
+import { Reveal } from "./Reveal";
 
 export function SignatureExperienceSection() {
   return (
-    <Section spacing="spacious" className="signature-experience">
-      <Container className="signature-experience__inner">
-        <div className="signature-experience__media">
+    <section className="lux-section lux-section--ivory" aria-labelledby="signature-title">
+      <div className="lux-container lux-signature">
+        <Reveal className="lux-signature__media">
           <Image
             src={signatureExperience.imageSrc}
             alt={signatureExperience.imageAlt}
             fill
-            sizes="(max-width: 900px) 100vw, 50vw"
-            className="signature-experience__image"
+            sizes="(max-width: 900px) 100vw, 48vw"
+            className="lux-signature__image"
           />
-        </div>
-        <div className="signature-experience__copy">
-          <p className="eyebrow">FEATURED EXPERIENCE</p>
-          <h2>{signatureExperience.heading}</h2>
-          <p className="lead">{signatureExperience.body}</p>
-          <div className="signature-experience__list" aria-label="Perfect for">
-            <p>Perfect for</p>
-            <ul>
-              {signatureExperience.perfectFor.map((occasion) => (
-                <li key={occasion}>
-                  <Check size={16} strokeWidth={1.75} aria-hidden="true" />
-                  {occasion}
+        </Reveal>
+
+        <Reveal className="lux-signature__content" delayMs={120}>
+          <p className="lux-eyebrow">{signatureExperience.eyebrow}</p>
+          <h2 id="signature-title">{signatureExperience.heading}</h2>
+          <p className="lux-signature__body">{signatureExperience.body}</p>
+
+          <ul className="lux-icon-features">
+            {signatureExperience.features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <li key={feature.id}>
+                  <span className="lux-icon-features__icon" aria-hidden="true">
+                    <Icon size={18} strokeWidth={1.7} />
+                  </span>
+                  <span>{feature.label}</span>
                 </li>
-              ))}
-            </ul>
-          </div>
-          <Button href={signatureExperience.cta.href} variant="primary">
+              );
+            })}
+          </ul>
+
+          <Button href={signatureExperience.cta.href} variant="primary" size="lg">
             {signatureExperience.cta.label}
           </Button>
-        </div>
-      </Container>
-    </Section>
+        </Reveal>
+      </div>
+    </section>
   );
 }

@@ -29,9 +29,11 @@ export function FeatureCard({ feature }: { feature: HomePillar }) {
           <Link href={feature.href} className="feature-card__link">
             {feature.linkLabel} <ArrowRight size={16} aria-hidden="true" />
           </Link>
-          <Button href={feature.bookingHref} variant="outline">
-            Book Now
-          </Button>
+          {feature.bookingHref ? (
+            <Button href={feature.bookingHref} variant="outline">
+              Book Now
+            </Button>
+          ) : null}
         </div>
       </div>
     </article>

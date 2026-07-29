@@ -12,7 +12,7 @@
         "start": "next start",
         "lint": "eslint .",
         "typecheck": "tsc --noEmit",
-        "test:booking": "node --test --experimental-strip-types tests/booking-service.test.ts",
+        "test:booking": "tsx --test tests/booking-service.test.ts tests/booking-wizard.test.ts",
         "test:platform": "node --test --experimental-strip-types tests/platform-foundation.test.ts",
         "test:commerce": "tsx --test tests/commerce.test.ts"
     },

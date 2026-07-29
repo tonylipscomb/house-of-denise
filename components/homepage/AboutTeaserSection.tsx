@@ -12,7 +12,7 @@ export function AboutTeaserSection() {
         <div className="about-teaser__visual" aria-label="Editorial House Of Denise founder story visual">
           <div className="about-teaser__frame">
             <Image
-              src="/images/house-of-denise/hero-lifestyle.png"
+              src="/images/house-of-denise/hero-editorial.jpg"
               alt=""
               fill
               sizes="(max-width: 900px) 100vw, 38vw"

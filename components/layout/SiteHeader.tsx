@@ -1,84 +1,98 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, Menu, Search, ShoppingBag, UserRound } from "lucide-react";
+import { Menu, ShoppingBag, UserRound, X } from "lucide-react";
 import { brand } from "@/data/brand";
 import { bookingNav, primaryNav } from "@/data/navigation";
-import { Drawer } from "@/components/ui/Drawer";
+import { CartCount } from "@/components/commerce/CartCount";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 
 export function SiteHeader() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [bookingOpen, setBookingOpen] = useState(false);
-  const bookingTriggerRef = useRef<HTMLButtonElement>(null);
-  const bookingMenuRef = useRef<HTMLDivElement>(null);
+  const [scrolled, setScrolled] = useState(false);
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
-
-  const closeBookingMenu = (returnFocus = true) => {
-    setBookingOpen(false);
-    if (returnFocus) {
-      bookingTriggerRef.current?.focus();
-    }
-  };
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
   useEffect(() => {
-    if (!bookingOpen) return;
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        closeBookingMenu(true);
+        setMenuOpen(false);
+        menuTriggerRef.current?.focus();
       }
-    };
-
-    const onPointerDown = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (bookingMenuRef.current?.contains(target) || bookingTriggerRef.current?.contains(target)) {
-        return;
-      }
-      closeBookingMenu(true);
     };
 
     document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("mousedown", onPointerDown);
-
     return () => {
+      document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("mousedown", onPointerDown);
     };
-  }, [bookingOpen]);
+  }, [menuOpen]);
 
   return (
     <>
-      <header className="site-header">
-        <div className="header-inner">
+      <header className={cn("lux-header", scrolled && "lux-header--scrolled")}>
+        <div className="lux-header__inner">
           <button
             ref={menuTriggerRef}
             type="button"
-            className="icon-button mobile-menu"
+            className="lux-header__icon lux-header__menu-trigger"
             aria-label="Open menu"
             aria-expanded={menuOpen}
+            aria-controls="mobile-navigation"
             onClick={() => setMenuOpen(true)}
           >
-            <Menu size={24} />
+            <Menu size={22} strokeWidth={1.75} aria-hidden="true" />
           </button>
 
-          <Link className="brand" href="/">
-            <span>{brand.name}</span>
-            <small>{brand.tagline.toUpperCase()}</small>
+          <Link className="lux-header__brand" href="/">
+            <span className="lux-header__brand-mark" aria-hidden="true">
+              <Image
+                src="/images/house-of-denise/hd-crest-light.png"
+                alt=""
+                width={64}
+                height={36}
+                className="lux-header__brand-mark-img"
+                priority
+              />
+            </span>
+            <span className="lux-header__brand-text">
+              <span className="lux-header__brand-name">{brand.name}</span>
+              <small className="lux-header__brand-tagline">
+                FRAGRANCE · SELF-CARE · EXPERIENCES
+              </small>
+            </span>
           </Link>
 
-          <nav className="desktop-nav" aria-label="Primary navigation">
+          <nav className="lux-header__nav" aria-label="Primary navigation">
             {primaryNav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(isActive(item.href) && "nav-link--active")}
+                className={cn(
+                  "lux-header__nav-link",
+                  isActive(item.href) && "lux-header__nav-link--active"
+                )}
                 aria-current={isActive(item.href) ? "page" : undefined}
               >
                 {item.label}
@@ -86,76 +100,106 @@ export function SiteHeader() {
             ))}
           </nav>
 
-          <div className="header-actions">
-            <div className="header-booking desktop-only">
-              <button
-                ref={bookingTriggerRef}
-                type="button"
-                className="header-booking__trigger"
-                aria-expanded={bookingOpen}
-                aria-haspopup="menu"
-                aria-controls="booking-menu"
-                onClick={() => setBookingOpen((open) => !open)}
-              >
-                Book <ChevronDown size={16} aria-hidden="true" />
-              </button>
-              {bookingOpen ? (
-                <div ref={bookingMenuRef} id="booking-menu" className="header-booking__menu" role="menu">
-                  {bookingNav.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="header-booking__item"
-                      role="menuitem"
-                      onClick={() => closeBookingMenu(false)}
-                    >
-                      <strong>{item.label}</strong>
-                      <span>{item.description}</span>
-                    </Link>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-            <button type="button" className="icon-button desktop-only" aria-label="Search">
-              <Search size={21} />
-            </button>
-            <Link href="/account" className="icon-button desktop-only" aria-label="Account">
-              <UserRound size={21} />
+          <div className="lux-header__actions">
+            <Button
+              href="/booking"
+              variant="gold"
+              size="sm"
+              className="lux-header__book desktop-only"
+            >
+              Book Experience
+            </Button>
+            <Link
+              href="/account"
+              className="lux-header__icon desktop-only"
+              aria-label="Account"
+            >
+              <UserRound size={20} strokeWidth={1.75} aria-hidden="true" />
             </Link>
-            <Link href="/cart" className="icon-button cart-button" aria-label="Cart">
-              <ShoppingBag size={23} />
-              <span aria-hidden="true">0</span>
+            <Link href="/cart" className="lux-header__icon lux-header__cart" aria-label="Cart">
+              <ShoppingBag size={21} strokeWidth={1.75} aria-hidden="true" />
+              <CartCount />
             </Link>
           </div>
         </div>
       </header>
 
-      <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} title="Menu" side="left">
-        <nav className="mobile-nav" aria-label="Mobile navigation">
-          {primaryNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn("mobile-nav__link", isActive(item.href) && "nav-link--active")}
-              aria-current={isActive(item.href) ? "page" : undefined}
-              onClick={() => setMenuOpen(false)}
-            >
-              {item.label}
-            </Link>
-          ))}
-          <div className="mobile-nav__group">
-            <p className="mobile-nav__label">Book an experience</p>
-            {bookingNav.map((item) => (
-              <Link key={item.href} href={item.href} className="mobile-nav__link" onClick={() => setMenuOpen(false)}>
-                {item.label}
-              </Link>
-            ))}
-          </div>
-          <Button href="/shop" variant="primary" fullWidth onClick={() => setMenuOpen(false)}>
-            Shop the collection
-          </Button>
-        </nav>
-      </Drawer>
+      {menuOpen ? (
+        <div className="lux-drawer lux-drawer--open">
+          <button
+            type="button"
+            className="lux-drawer__backdrop"
+            aria-label="Close menu"
+            onClick={() => {
+              setMenuOpen(false);
+              menuTriggerRef.current?.focus();
+            }}
+          />
+          <aside
+            id="mobile-navigation"
+            className="lux-drawer__panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation"
+          >
+            <div className="lux-drawer__top">
+              <p className="lux-drawer__brand">{brand.name}</p>
+              <button
+                ref={closeButtonRef}
+                type="button"
+                className="lux-header__icon"
+                aria-label="Close menu"
+                onClick={() => {
+                  setMenuOpen(false);
+                  menuTriggerRef.current?.focus();
+                }}
+              >
+                <X size={22} strokeWidth={1.75} aria-hidden="true" />
+              </button>
+            </div>
+
+            <nav className="lux-drawer__nav" aria-label="Mobile navigation">
+              {primaryNav.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "lux-drawer__link",
+                    isActive(item.href) && "lux-drawer__link--active"
+                  )}
+                  aria-current={isActive(item.href) ? "page" : undefined}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+
+              <div className="lux-drawer__group">
+                <p className="lux-drawer__label">Book an experience</p>
+                {bookingNav.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="lux-drawer__sublink"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </nav>
+
+            <div className="lux-drawer__cta">
+              <Button href="/booking" variant="gold" fullWidth onClick={() => setMenuOpen(false)}>
+                Book Experience
+              </Button>
+              <Button href="/shop" variant="outline" fullWidth onClick={() => setMenuOpen(false)}>
+                Shop the collection
+              </Button>
+            </div>
+          </aside>
+        </div>
+      ) : null}
     </>
   );
 }

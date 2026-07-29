@@ -114,8 +114,57 @@ export type Booking = {
   payment_status: string;
   source: string;
   customer_notes: string | null;
+  venue_name: string | null;
+  event_address: string | null;
+  occasion: string | null;
+  event_type: string | null;
+  indoor_outdoor: string | null;
+  special_requests: string | null;
+  accessibility_needs: string | null;
+  additional_notes: string | null;
+  preferred_contact_method: string | null;
+  package_slug: string | null;
+  experience_slug: string | null;
+  package_price_cents: number;
+  upgrade_total_cents: number;
+  service_fee_cents: number;
+  subtotal_cents: number;
+  deposit_amount_cents: number;
+  amount_paid_cents: number;
+  remaining_balance_cents: number;
+  remaining_balance_due_at: string | null;
+  payment_option: "deposit" | "full";
+  square_checkout_id: string | null;
+  square_payment_id: string | null;
+  square_payment_link_url: string | null;
+  checkout_idempotency_key: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type BookingUpgradeRow = {
+  id: string;
+  workspace_id: string;
+  booking_id: string;
+  upgrade_slug: string;
+  name: string;
+  description: string;
+  unit_price_cents: number | null;
+  quantity: number;
+  line_total_cents: number | null;
+  quoted_separately: boolean;
+  created_at: string;
+};
+
+export type BookingStatusHistoryRow = {
+  id: string;
+  workspace_id: string;
+  booking_id: string;
+  old_status: string | null;
+  new_status: string;
+  changed_by: string | null;
+  reason: string | null;
+  created_at: string;
 };
 
 export type BookingInquiryRow = {
@@ -163,6 +212,18 @@ export type Database = {
       services: { Row: Service; Insert: Partial<Service> & Pick<Service, "workspace_id" | "slug" | "name">; Update: Partial<Service>; Relationships: [] };
       service_variants: { Row: ServiceVariant; Insert: Partial<ServiceVariant> & Pick<ServiceVariant, "workspace_id" | "service_id" | "name">; Update: Partial<ServiceVariant>; Relationships: [] };
       bookings: { Row: Booking; Insert: Partial<Booking> & Pick<Booking, "workspace_id" | "reference_number">; Update: Partial<Booking>; Relationships: [] };
+      booking_upgrades: {
+        Row: BookingUpgradeRow;
+        Insert: Partial<BookingUpgradeRow> & Pick<BookingUpgradeRow, "workspace_id" | "booking_id" | "upgrade_slug" | "name">;
+        Update: Partial<BookingUpgradeRow>;
+        Relationships: [];
+      };
+      booking_status_history: {
+        Row: BookingStatusHistoryRow;
+        Insert: Partial<BookingStatusHistoryRow> & Pick<BookingStatusHistoryRow, "workspace_id" | "booking_id" | "new_status">;
+        Update: Partial<BookingStatusHistoryRow>;
+        Relationships: [];
+      };
       booking_inquiries: {
         Row: BookingInquiryRow;
         Insert: Partial<BookingInquiryRow> & Pick<BookingInquiryRow, "reference_number" | "full_name" | "email" | "phone" | "event_type" | "event_date" | "event_city" | "estimated_guest_count" | "experience_format" | "consent_accepted">;

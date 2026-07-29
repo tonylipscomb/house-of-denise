@@ -2,8 +2,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   BadgeCheck,
   CalendarHeart,
-  Building2,
-  Flame,
   FlaskConical,
   Gift,
   HandHeart,
@@ -21,111 +19,197 @@ export type HomePillar = {
   description: string;
   href: string;
   linkLabel: string;
-  bookingHref: string;
+  bookingHref?: string;
   imageSrc: string;
   imageAlt: string;
   imagePosition: string;
   icon: LucideIcon;
 };
 
-export type SignatureExperience = {
-  heading: string;
-  body: string;
-  imageSrc: string;
-  imageAlt: string;
-  perfectFor: string[];
-  cta: { label: string; href: string };
+export type TrustHighlight = {
+  id: string;
+  label: string;
+  icon: LucideIcon;
 };
 
-export type InstagramImage = {
+export type ProcessStep = {
   id: string;
-  imageSrc: string;
-  imageAlt: string;
-  imagePosition: string;
-  size: "wide" | "tall" | "standard";
+  title: string;
+  description: string;
 };
+
+export type SignatureFeature = {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+};
+
+export type HomeTestimonial = {
+  id: string;
+  quote: string;
+  name: string;
+  eventType: string;
+};
+
+/* Image map for the homepage redesign.
+ * Hero: /images/house-of-denise/hero-editorial.jpg (from mobilefragrancebar.png)
+ * Featured cards use dedicated service images.
+ * Signature: /images/house-of-denise/signature-experience.jpg (from gifts.png)
+ * CTA: /images/house-of-denise/cta-editorial.jpg (from privateevents.png)
+ * Replace hero-editorial later with a dedicated wide lifestyle shoot if available.
+ */
 
 export const heroContent = {
   eyebrow: "LUXURY FRAGRANCE EXPERIENCES",
-  heading: "Luxury fragrance experiences, beautifully brought to you.",
-  body: "House Of Denise creates elevated mobile fragrance bars, workshops and private-event experiences designed for connection, self-care and unforgettable celebration.",
-  primaryCta: { label: "Book Your Experience", href: "/booking" },
-  secondaryCta: { label: "Explore Services", href: "/experiences" },
-  accent: "Fragrance - Self-Care - Experiences",
+  headingLines: ["Scents that celebrate.", "Experiences that connect."],
+  body: "House of Denise creates elevated fragrance experiences, from luxury workshops and private events to mobile fragrance bars—designed for connection, self-care, and unforgettable celebrations.",
+  primaryCta: { label: "Explore Experiences", href: "/experiences" },
+  secondaryCta: { label: "Book Private Event", href: "/private-events" },
+  trustHighlights: [
+    { id: "bespoke", label: "Bespoke & Luxurious", icon: Sparkles },
+    { id: "intentional", label: "Intentional & Memorable", icon: HeartHandshake },
+    { id: "crafted", label: "Crafted With Care", icon: HandHeart }
+  ] as TrustHighlight[],
   image: {
-    src: "/images/house-of-denise/hero-lifestyle.png",
-    alt: "Warm lifestyle scene with House Of Denise fragrance and self-care styling"
+    src: "/images/house-of-denise/hero-editorial.jpg",
+    alt: "House of Denise mobile fragrance bar with perfume bottles, florals, and candlelight",
+    position: "center 45%"
   }
 } as const;
 
 export const trustSignals = [
   { id: "mobile", label: "Luxury Mobile Fragrance Experiences", icon: Sparkles },
   { id: "private", label: "Private Events", icon: CalendarHeart },
-  { id: "corporate", label: "Corporate Experiences", icon: Building2 },
+  { id: "corporate", label: "Corporate Experiences", icon: Users },
   { id: "workshops", label: "Custom Workshops", icon: Palette },
   { id: "owned", label: "Women-Owned Business", icon: HeartHandshake }
 ] as const;
+
+export const featuredExperiencesHeading = {
+  eyebrow: "FEATURED EXPERIENCES",
+  title: "Curated for every kind of celebration.",
+  description:
+    "Choose a refined fragrance experience for private events, workshops, gifting, or guest-centered celebrations."
+} as const;
 
 export const homePillars: HomePillar[] = [
   {
     id: "fragrance-bar",
     title: "Mobile Fragrance Bar",
-    description: "A polished scent-blending experience brought to weddings, birthdays, showers, corporate gatherings and intimate celebrations.",
+    description:
+      "We bring the fragrance experience to you—perfect for celebrations, markets, brand activations, pop-ups, and more.",
     href: "/perfume-bar",
     linkLabel: "Learn More",
-    bookingHref: "/booking",
-    imageSrc: "/images/house-of-denise/pillar-perfume.jpg",
-    imageAlt: "Fragrance bottles and oils arranged for a scent blending experience",
-    imagePosition: "70% center",
+    imageSrc: "/images/house-of-denise/mobile-fragrance-bar.jpg",
+    imageAlt: "Mobile fragrance bar with perfume bottles, florals, and scent testing strips",
+    imagePosition: "center",
     icon: FlaskConical
   },
   {
     id: "workshops",
     title: "Luxury Workshops",
-    description: "Guided fragrance and self-care sessions that feel intimate, refined and memorable for groups of many sizes.",
+    description:
+      "Guided fragrance-blending workshops designed to inspire creativity, connection, and self-care.",
     href: "/workshops",
     linkLabel: "Learn More",
-    bookingHref: "/booking",
-    imageSrc: "/images/house-of-denise/pillar-workshops.jpg",
-    imageAlt: "Guests creating together during a workshop",
-    imagePosition: "30% center",
+    imageSrc: "/images/house-of-denise/luxury-workshops.jpg",
+    imageAlt: "Workshop setup with amber dropper bottles, candle, and scent strips",
+    imagePosition: "center",
     icon: Palette
   },
   {
     id: "private-events",
     title: "Private Events",
-    description: "Thoughtful event activations with an elegant setup, guest-friendly flow and premium presentation from arrival to close.",
+    description:
+      "Intimate, elevated experiences curated for birthdays, bridal showers, celebrations, and special occasions.",
     href: "/private-events",
     linkLabel: "Learn More",
-    bookingHref: "/booking",
-    imageSrc: "/images/house-of-denise/pillar-events.jpg",
-    imageAlt: "Styled private event table for a luxury creative gathering",
-    imagePosition: "center 35%",
+    imageSrc: "/images/house-of-denise/private-events.jpg",
+    imageAlt: "Private events table setting with House of Denise branding and candlelight",
+    imagePosition: "center",
     icon: CalendarHeart
   },
   {
     id: "gift-experiences",
     title: "Gift Experiences",
-    description: "Beautifully considered fragrance and self-care moments for gifting, celebrations, client appreciation and special occasions.",
+    description:
+      "Beautifully packaged fragrance and self-care experiences for gifting, client appreciation, and meaningful occasions.",
     href: "/shop",
     linkLabel: "Learn More",
-    bookingHref: "/booking",
-    imageSrc: "/images/house-of-denise/pillar-shop.jpg",
-    imageAlt: "Handcrafted self-care products styled on a warm surface",
-    imagePosition: "center 45%",
+    imageSrc: "/images/house-of-denise/gift-experiences.jpg",
+    imageAlt: "House of Denise gift boxes with gold ribbon and perfume bottle",
+    imagePosition: "center",
     icon: Gift
   }
 ];
 
-export const signatureExperience: SignatureExperience = {
-  heading: "The Signature Fragrance Experience",
-  body: "Our mobile fragrance bar transforms ordinary celebrations into unforgettable memories.",
-  imageSrc: "/images/house-of-denise/pillar-perfume.jpg",
-  imageAlt: "Luxury fragrance bar with bottles and blending materials",
-  perfectFor: ["Birthdays", "Bridal Showers", "Corporate Events", "Private Parties", "Baby Showers", "Weddings"],
-  cta: { label: "Reserve Your Experience", href: "/booking" }
+export const signatureExperience = {
+  eyebrow: "OUR SIGNATURE",
+  heading: "The House of Denise Experience",
+  body: "We believe fragrance is more than a scent—it is a feeling, a memory, and a moment of connection. Our experiences blend luxury, creativity, and intention to help guests slow down, celebrate, and create something uniquely their own.",
+  imageSrc: "/images/house-of-denise/signature-experience.jpg",
+  imageAlt: "House of Denise gift packaging with perfume bottle, ribbon, and dried florals",
+  features: [
+    { id: "materials", label: "Premium Materials", icon: Sparkles },
+    { id: "guidance", label: "Thoughtful Guidance", icon: ShieldCheck },
+    { id: "connection", label: "Meaningful Connection", icon: Users },
+    { id: "moments", label: "Unforgettable Moments", icon: Star }
+  ] as SignatureFeature[],
+  cta: { label: "Explore Our Story", href: "/our-story" }
 };
 
+export const processHeading = {
+  eyebrow: "A CONSIDERED PATH FROM INQUIRY TO EXPERIENCE",
+  title: "How it works"
+} as const;
+
+export const bookingProcessSteps: ProcessStep[] = [
+  {
+    id: "inquiry",
+    title: "Submit Inquiry",
+    description: "Tell us about your event, goals, preferred date, and vision."
+  },
+  {
+    id: "consultation",
+    title: "Consultation",
+    description: "We connect to discuss your ideas, preferences, and experience details."
+  },
+  {
+    id: "proposal",
+    title: "Proposal & Plan",
+    description: "You receive a thoughtful proposal and curated experience plan."
+  },
+  {
+    id: "experience",
+    title: "Experience Day",
+    description: "House of Denise brings the experience to life with polished execution."
+  },
+  {
+    id: "impact",
+    title: "Lasting Impact",
+    description: "Guests leave with meaningful memories and a scent experience that lasts."
+  }
+];
+
+export const homeTestimonial: HomeTestimonial = {
+  id: "featured",
+  quote:
+    "House of Denise made our celebration feel intimate and unforgettable. Every guest left talking about the fragrance experience.",
+  name: "Amanda R.",
+  eventType: "Bridal Shower"
+};
+
+export const bookingCta = {
+  eyebrow: "READY TO CREATE SOMETHING BEAUTIFUL?",
+  title: "Let's bring your vision to life.",
+  description:
+    "Start planning a custom fragrance experience created around your celebration, guests, and vision.",
+  cta: { label: "Book Your Experience", href: "/booking" },
+  imageSrc: "/images/house-of-denise/cta-editorial.jpg",
+  imageAlt: "Elegant private events styling with House of Denise branding and candlelight"
+} as const;
+
+/* Kept for other pages / residual imports */
 export const aboutTeaser = {
   eyebrow: "MEET DENISE",
   title: "A house built on care, craft and beautiful memory.",
@@ -133,79 +217,6 @@ export const aboutTeaser = {
     "Founded by Tasheika Meadows, House Of Denise brings luxury fragrance, self-care and meaningful experiences together with thoughtful hospitality, feminine ease and a warm sense of community.",
   cta: { label: "Meet Tasheika", href: "/our-story" }
 } as const;
-
-export const instagramGallery: InstagramImage[] = [
-  {
-    id: "gallery-fragrance",
-    imageSrc: "/images/house-of-denise/pillar-perfume.jpg",
-    imageAlt: "Fragrance bottles arranged for a House Of Denise experience",
-    imagePosition: "65% center",
-    size: "tall"
-  },
-  {
-    id: "gallery-shop",
-    imageSrc: "/images/house-of-denise/pillar-shop.jpg",
-    imageAlt: "House Of Denise handcrafted self-care products",
-    imagePosition: "center 45%",
-    size: "standard"
-  },
-  {
-    id: "gallery-workshop",
-    imageSrc: "/images/house-of-denise/pillar-workshops.jpg",
-    imageAlt: "Creative workshop setup with materials",
-    imagePosition: "30% center",
-    size: "wide"
-  },
-  {
-    id: "gallery-events",
-    imageSrc: "/images/house-of-denise/pillar-events.jpg",
-    imageAlt: "Private event setting styled for celebration",
-    imagePosition: "center 35%",
-    size: "standard"
-  },
-  {
-    id: "gallery-hero",
-    imageSrc: "/images/house-of-denise/hero-lifestyle.png",
-    imageAlt: "House Of Denise lifestyle scene",
-    imagePosition: "center 42%",
-    size: "wide"
-  }
-];
-
-export const experienceToneItems = [
-  { id: "luxury", label: "Luxury fragrance", icon: Sparkles },
-  { id: "self-care", label: "Self-care rituals", icon: HandHeart },
-  { id: "hospitality", label: "Thoughtful hospitality", icon: Gift },
-  { id: "community", label: "Community connection", icon: Flame }
-] as const;
-
-export const bookingProcessSteps = [
-  {
-    id: "inquiry",
-    title: "Submit Inquiry",
-    description: "Share your date, guest count, event type and fragrance-experience preferences."
-  },
-  {
-    id: "consultation",
-    title: "Consultation",
-    description: "House Of Denise reviews your details and follows up to learn more about the celebration."
-  },
-  {
-    id: "proposal",
-    title: "Proposal Review",
-    description: "You receive availability, experience recommendations and planning details for review."
-  },
-  {
-    id: "deposit",
-    title: "Square Deposit",
-    description: "After review, deposit details are provided through the approved payment workflow."
-  },
-  {
-    id: "experience",
-    title: "Luxury Experience",
-    description: "Your guests enjoy a polished fragrance moment designed with care from setup to close."
-  }
-] as const;
 
 export const whyHouseItems = [
   {
@@ -280,3 +291,56 @@ export const finalCta = {
     "Tell House Of Denise about your celebration, and the team will follow up with availability, planning details and next steps.",
   cta: { label: "Book Your Experience", href: "/booking" }
 } as const;
+
+export const experienceToneItems = [
+  { id: "luxury", label: "Luxury fragrance", icon: Sparkles },
+  { id: "self-care", label: "Self-care rituals", icon: HandHeart },
+  { id: "hospitality", label: "Thoughtful hospitality", icon: Gift },
+  { id: "community", label: "Community connection", icon: HeartHandshake }
+] as const;
+
+export type InstagramImage = {
+  id: string;
+  imageSrc: string;
+  imageAlt: string;
+  imagePosition: string;
+  size: "wide" | "tall" | "standard";
+};
+
+export const instagramGallery: InstagramImage[] = [
+  {
+    id: "gallery-fragrance",
+    imageSrc: "/images/house-of-denise/mobile-fragrance-bar.jpg",
+    imageAlt: "Fragrance bottles arranged for a House Of Denise experience",
+    imagePosition: "center",
+    size: "tall"
+  },
+  {
+    id: "gallery-shop",
+    imageSrc: "/images/house-of-denise/gift-experiences.jpg",
+    imageAlt: "House Of Denise handcrafted gift packaging",
+    imagePosition: "center",
+    size: "standard"
+  },
+  {
+    id: "gallery-workshop",
+    imageSrc: "/images/house-of-denise/luxury-workshops.jpg",
+    imageAlt: "Creative workshop setup with materials",
+    imagePosition: "center",
+    size: "wide"
+  },
+  {
+    id: "gallery-events",
+    imageSrc: "/images/house-of-denise/private-events.jpg",
+    imageAlt: "Private event setting styled for celebration",
+    imagePosition: "center",
+    size: "standard"
+  },
+  {
+    id: "gallery-hero",
+    imageSrc: "/images/house-of-denise/hero-editorial.jpg",
+    imageAlt: "House Of Denise lifestyle fragrance scene",
+    imagePosition: "center",
+    size: "wide"
+  }
+];

@@ -1,23 +1,17 @@
-import { AboutTeaserSection } from "@/components/homepage/AboutTeaserSection";
-import { FaqPreviewSection } from "@/components/homepage/FaqPreviewSection";
-import { FinalCtaSection } from "@/components/homepage/FinalCtaSection";
+import { TestimonialBookingCTA } from "@/components/homepage/TestimonialBookingCTA";
 import { HeroSection } from "@/components/homepage/HeroSection";
 import { HowItWorksSection } from "@/components/homepage/HowItWorksSection";
-import { InstagramGallerySection } from "@/components/homepage/InstagramGallerySection";
 import { PillarsSection } from "@/components/homepage/PillarsSection";
 import { SignatureExperienceSection } from "@/components/homepage/SignatureExperienceSection";
-import { TestimonialsSection } from "@/components/homepage/TestimonialsSection";
-import { TrustSection } from "@/components/homepage/TrustSection";
-import { WhyHouseSection } from "@/components/homepage/WhyHouseSection";
 import { brand } from "@/data/brand";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
-  title: "Luxury Fragrance Experiences",
+  title: "Luxury Fragrance Experiences & Private Events",
   description:
-    "House Of Denise creates luxury mobile fragrance bars, custom workshops, private events and self-care experiences for elegant celebrations.",
+    "Discover luxury fragrance workshops, mobile fragrance bars, private events, gift experiences, and curated self-care experiences from House of Denise.",
   path: "/",
-  image: "/images/house-of-denise/hero-lifestyle.png"
+  image: "/images/house-of-denise/hero-editorial.jpg"
 });
 
 function LocalBusinessSchema() {
@@ -29,7 +23,7 @@ function LocalBusinessSchema() {
     url: "https://houseofdenise.com/",
     email: brand.email ?? "info@houseofdenise.com",
     telephone: brand.phone ?? "804-850-4222",
-    image: "https://houseofdenise.com/images/house-of-denise/hero-lifestyle.png",
+    image: "https://houseofdenise.com/images/house-of-denise/hero-editorial.jpg",
     founder: {
       "@type": "Person",
       name: "Tasheika Meadows"
@@ -49,16 +43,10 @@ export default function HomePage() {
     <>
       <LocalBusinessSchema />
       <HeroSection />
-      <TrustSection />
       <PillarsSection />
-      <HowItWorksSection />
       <SignatureExperienceSection />
-      <WhyHouseSection />
-      <InstagramGallerySection />
-      <TestimonialsSection />
-      <AboutTeaserSection />
-      <FaqPreviewSection />
-      <FinalCtaSection />
+      <HowItWorksSection />
+      <TestimonialBookingCTA />
     </>
   );
 }

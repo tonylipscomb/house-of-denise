@@ -1,44 +1,55 @@
 import Image from "next/image";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { heroContent } from "@/data/home-content";
 import { Button } from "@/components/ui/Button";
-import { Container } from "@/components/ui/Container";
 
 export function HeroSection() {
   return (
-    <section className="hero" aria-label="Welcome">
-      <div className="hero-copy">
-        <Container className="hero-copy-inner" fullWidth>
-          <p className="eyebrow">{heroContent.eyebrow}</p>
-          <h1>{heroContent.heading}</h1>
-          <p className="hero-text">{heroContent.body}</p>
-          <div className="button-row">
-            <Button
-              href={heroContent.primaryCta.href}
-              variant="primary"
-              rightIcon={<ArrowRight size={17} aria-hidden="true" />}
-            >
+    <section className="lux-hero" aria-label="Welcome">
+      <div className="lux-hero__copy">
+        <div className="lux-hero__copy-inner lux-hero__animate">
+          <p className="lux-eyebrow">{heroContent.eyebrow}</p>
+          <h1 className="lux-hero__title">
+            {heroContent.headingLines.map((line) => (
+              <span key={line} className="lux-hero__title-line">
+                {line}
+              </span>
+            ))}
+          </h1>
+          <p className="lux-hero__body">{heroContent.body}</p>
+          <div className="lux-hero__actions">
+            <Button href={heroContent.primaryCta.href} variant="primary" size="lg" rightIcon={<ArrowRight size={18} aria-hidden="true" />}>
               {heroContent.primaryCta.label}
             </Button>
-            <Button href={heroContent.secondaryCta.href} variant="outline">
+            <Button href={heroContent.secondaryCta.href} variant="outline" size="lg">
               {heroContent.secondaryCta.label}
             </Button>
           </div>
-          <p className="hero-tagline">
-            <Sparkles size={16} strokeWidth={1.5} aria-hidden="true" />
-            {heroContent.accent}
-          </p>
-        </Container>
+          <ul className="lux-hero__trust">
+            {heroContent.trustHighlights.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.id}>
+                  <Icon size={18} strokeWidth={1.6} aria-hidden="true" />
+                  <span>{item.label}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </div>
-      <div className="hero-media">
+
+      <div className="lux-hero__media">
         <Image
           src={heroContent.image.src}
           alt={heroContent.image.alt}
           fill
           priority
-          sizes="(max-width: 900px) 100vw, 50vw"
-          className="hero-image"
+          sizes="(max-width: 900px) 100vw, 58vw"
+          className="lux-hero__image"
+          style={{ objectPosition: heroContent.image.position }}
         />
+        <div className="lux-hero__gradient" aria-hidden="true" />
       </div>
     </section>
   );

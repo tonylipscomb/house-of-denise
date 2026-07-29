@@ -1,0 +1,399 @@
+/* Shop coming soon — premium editorial landing */
+
+.shop-soon {
+  background: var(--color-cream);
+  color: var(--color-text);
+}
+
+.shop-soon__hero {
+  display: grid;
+  min-height: min(88vh, 860px);
+  background:
+    linear-gradient(120deg, #f8f3ec 0%, #f3ebe2 48%, #efe4d8 100%);
+}
+
+.shop-soon__hero-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(2.5rem, 6vw, 5rem) var(--page-padding);
+  max-width: 40rem;
+}
+
+.shop-soon__eyebrow {
+  color: var(--color-gold);
+  margin-bottom: var(--space-5);
+}
+
+.shop-soon__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(2.6rem, 2rem + 3vw, 4.4rem);
+  font-weight: 500;
+  line-height: 1.08;
+  color: var(--color-espresso);
+  letter-spacing: -0.01em;
+}
+
+.shop-soon__title-script {
+  display: inline-block;
+  margin-top: 0.15em;
+  font-family: var(--font-great-vibes), var(--font-serif);
+  font-style: normal;
+  font-weight: 400;
+  font-size: 1.15em;
+  line-height: 1;
+  color: var(--color-gold);
+}
+
+.shop-soon__flourish {
+  width: 4.5rem;
+  height: 1.5rem;
+  margin: 1.15rem 0 0;
+  color: var(--color-gold);
+}
+
+.shop-soon__flourish--light {
+  color: var(--color-gold);
+  margin: 0 0 1.25rem;
+}
+
+.shop-soon__lead {
+  margin: 1.25rem 0 0;
+  max-width: 32rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+  line-height: 1.75;
+}
+
+.shop-soon__hero-cta {
+  margin-top: 1.75rem;
+  width: fit-content;
+  min-height: 52px;
+  padding-inline: 1.5rem;
+}
+
+.shop-soon__hero-media {
+  position: relative;
+  min-height: 320px;
+  overflow: hidden;
+}
+
+.shop-soon__hero-image {
+  object-fit: cover;
+  object-position: center 40%;
+  animation: shop-soon-image-in 1.1s var(--ease-out) both;
+}
+
+.shop-soon__values {
+  background: var(--color-ivory);
+  border-block: 1px solid var(--color-border);
+  padding-block: clamp(2rem, 4vw, 3.25rem);
+}
+
+.shop-soon__values-inner {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.shop-soon__value {
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+}
+
+.shop-soon__value svg {
+  color: var(--color-gold);
+  margin-bottom: 0.85rem;
+}
+
+.shop-soon__value h2 {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-espresso);
+}
+
+.shop-soon__value p {
+  margin: 0.55rem 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.shop-soon__notify {
+  position: relative;
+  padding-block: clamp(3.5rem, 7vw, 5.5rem);
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 85% 30%, rgba(184, 138, 77, 0.12), transparent 55%),
+    linear-gradient(180deg, #f8f3ec 0%, #f4ebe3 100%);
+}
+
+.shop-soon__notify::after {
+  content: "";
+  position: absolute;
+  right: -4%;
+  top: 10%;
+  width: min(42vw, 360px);
+  height: min(42vw, 360px);
+  background:
+    radial-gradient(circle at 40% 40%, rgba(184, 138, 77, 0.16), transparent 62%);
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.shop-soon__notify-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 40rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.shop-soon__notify h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.85rem, 1.4rem + 1.4vw, 2.6rem);
+  font-weight: 500;
+  color: var(--color-espresso);
+  line-height: 1.2;
+}
+
+.shop-soon__notify-inner > p {
+  margin: 0.85rem 0 0;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.shop-soon__form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.shop-soon__form input {
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  background: var(--color-ivory);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.shop-soon__form input:focus {
+  outline: none;
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px rgba(184, 138, 77, 0.18);
+}
+
+.shop-soon__form .btn {
+  min-height: 52px;
+}
+
+.shop-soon__form-error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  text-align: left;
+}
+
+.shop-soon__notify-success {
+  margin: 1.75rem 0 0;
+  padding: 1rem 1.15rem;
+  border: 1px solid rgba(184, 138, 77, 0.35);
+  border-radius: var(--radius-md);
+  background: rgba(255, 253, 252, 0.8);
+  color: var(--color-espresso);
+  line-height: 1.6;
+}
+
+.shop-soon__privacy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 1rem 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.shop-soon__privacy svg {
+  color: var(--color-gold);
+  flex-shrink: 0;
+}
+
+.shop-soon__gallery {
+  display: grid;
+  gap: 0;
+  background: var(--color-espresso);
+}
+
+.shop-soon__gallery-intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(2rem, 5vw, 3.25rem);
+  color: var(--color-cream);
+  background: var(--color-espresso);
+  min-height: 280px;
+}
+
+.shop-soon__gallery-intro h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 1.25rem + 1.2vw, 2.15rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.25;
+}
+
+.shop-soon__gallery-intro p {
+  margin: 1rem 0 0;
+  color: rgba(248, 243, 236, 0.78);
+  line-height: 1.7;
+  max-width: 28rem;
+}
+
+.shop-soon__gallery-link {
+  margin-top: 1.35rem;
+  color: var(--color-champagne);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  width: fit-content;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.shop-soon__gallery-link:hover {
+  color: var(--color-ivory);
+}
+
+.shop-soon__gallery-card {
+  position: relative;
+  min-height: 280px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.shop-soon__gallery-image {
+  object-fit: cover;
+  transition: transform 0.7s var(--ease-out);
+}
+
+.shop-soon__gallery-card:hover .shop-soon__gallery-image {
+  transform: scale(1.04);
+}
+
+.shop-soon__gallery-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 45%, rgba(20, 10, 12, 0.72) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.shop-soon__gallery-card h3 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1.15rem;
+  z-index: 2;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ivory);
+}
+
+@keyframes shop-soon-image-in {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (min-width: 720px) {
+  .shop-soon__values-inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shop-soon__form {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+
+  .shop-soon__form-error {
+    grid-column: 1 / -1;
+  }
+
+  .shop-soon__gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 980px) {
+  .shop-soon__hero {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  }
+
+  .shop-soon__hero-copy {
+    padding-left: max(var(--page-padding), calc((100vw - var(--container-max)) / 2 + var(--page-padding)));
+    animation: lux-fade-up 0.9s var(--ease-out) both;
+  }
+
+  .shop-soon__hero-media {
+    min-height: 100%;
+  }
+
+  .shop-soon__values-inner {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+  }
+
+  .shop-soon__value {
+    position: relative;
+    padding-inline: 1.25rem;
+  }
+
+  .shop-soon__value:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 12%;
+    bottom: 12%;
+    right: 0;
+    width: 1px;
+    background: var(--color-border);
+  }
+
+  .shop-soon__gallery {
+    grid-template-columns: 1.05fr repeat(3, minmax(0, 1fr));
+  }
+
+  .shop-soon__gallery-intro,
+  .shop-soon__gallery-card {
+    min-height: 360px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-soon__hero-copy,
+  .shop-soon__hero-image,
+  .shop-soon__gallery-image {
+    animation: none !important;
+    transition: none !important;
+  }
+}

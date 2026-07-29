@@ -45,6 +45,23 @@ function adminClient() {
   });
 }
 
+const SHOP_IMAGE_BY_SLUG: Record<string, string> = {
+  "mobile-fragrance-bar-deposit":
+    "/images/house-of-denise/shop-mobile-fragrance-bar.jpg",
+  "private-event-deposit":
+    "/images/house-of-denise/shop-private-events.jpg",
+  "perfume-bar-experience":
+    "/images/house-of-denise/shop-perfume-bar.jpg",
+  "custom-fragrance-gift-set":
+    "/images/house-of-denise/shop-custom-gift-set.jpg",
+  "signature-fragrance-workshop":
+    "/images/house-of-denise/shop-workshops.jpg",
+};
+
+function resolveCommerceImage(slug: string, imageUrl: string): string {
+  return SHOP_IMAGE_BY_SLUG[slug] ?? imageUrl;
+}
+
 export function mapCommerceItem(row: CommerceItemRow): CommerceItem {
   return {
     id: row.id,
@@ -54,7 +71,7 @@ export function mapCommerceItem(row: CommerceItemRow): CommerceItem {
     itemType: row.item_type,
     priceInCents: row.price_cents,
     active: row.active,
-    image: row.image_url,
+    image: resolveCommerceImage(row.slug, row.image_url),
     fulfillmentType: row.fulfillment_type,
     squareCatalogVariationId:
       row.square_catalog_variation_id ?? undefined,
